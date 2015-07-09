@@ -74,7 +74,7 @@ public class LocalTextStorage extends StorageFacility{
     public boolean exists(final String topic) {
         if (!loaded) {
         //implementation 1
-            final String safeName = StringSafety.charNumUnderscore(topic);
+            final String safeName = StringSafety.charNumScore255(topic);
             return Files.exists(Paths.get(DIR + File.separator + safeName));
         }
         //implementation 2
@@ -118,7 +118,7 @@ public class LocalTextStorage extends StorageFacility{
             //New topic
             if (!topics.contains(topic)) {
                 //create dir
-                safeFolderName = StringSafety.charNumUnderscore(topic.getTopic());
+                safeFolderName = StringSafety.charNumScore255(topic.getTopic());
                 Files.createDirectory(Paths.get(DIR + File.separator + safeFolderName));
 
                 //update cache
@@ -134,7 +134,7 @@ public class LocalTextStorage extends StorageFacility{
             final String articleDir = DIR + File.separator + safeFolderName;
 
             //article file
-            final String safeFileName = StringSafety.charNumUnderscore(article.getTitle()) + ".txt";
+            final String safeFileName = StringSafety.charNumScore255(article.getTitle()) + ".txt";
             //full path
             final String fileName = articleDir + File.separator + safeFileName;
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),

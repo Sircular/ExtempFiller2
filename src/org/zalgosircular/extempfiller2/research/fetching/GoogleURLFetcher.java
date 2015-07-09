@@ -26,7 +26,7 @@ public class GoogleURLFetcher extends URLFetcher {
     }
 
     public List<URI> fetchURLs(String topic, int maxArticles, List<String> excludes) throws IOException {
-        List<URI> urls = new ArrayList<>();
+        List<URI> urls = new ArrayList<URI>();
         try {
             // convert the topic to a google search query
             String queryURL = String.format(QUERY_STRING,
