@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,25 +17,23 @@ import java.util.Queue;
 /**
  * Created by Walt on 7/8/2015.
  */
-public class GoogleURLFetcher extends URLFetcher {
-
+public class DDGURLFetcher extends URLFetcher {
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36";
-    private final String QUERY_STRING = "http://www.google.com/search?q=%s";
-    public GoogleURLFetcher(Queue outQueue) {
-        super(outQueue);
+    private final String QUERY_STRING = "http://duckduckgo.com/?q=%s";
+
+    public DDGURLFetcher(Queue outQueue) {
+        super (outQueue);
     }
 
     public List<URI> fetchURLs(String topic, int maxArticles, List<String> excludes) throws IOException {
         List<URI> urls = new ArrayList<>();
         try {
-            // convert the topic to a google search query
+            // convert the topic to a duckduckgo search query
             String queryURL = String.format(QUERY_STRING,
                     URLEncoder.encode(topic, "UTF-8"));
             Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).get();
-            // so it turns out that the cite tags sometimes truncate
-            // the urls, so I have to go in and get the href stuff,
-            // then parse out all the redirection. UGH.
-            Elements searchResults = contentsDoc.select("div#ires li.g h3.r a");
+            // duckduckgo is better about this than google
+            Elements searchResults = contentsDoc.select("a.result__a");
             // get their target urls
             for (Element el : searchResults) {
                 // YES
