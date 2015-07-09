@@ -19,7 +19,7 @@ import java.util.Queue;
  */
 public class DDGURLFetcher extends URLFetcher {
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36";
-    private final String QUERY_STRING = "http://duckduckgo.com/?q=%s";
+    private final String QUERY_STRING = "http://duckduckgo.com/html/?q=%s";
 
     public DDGURLFetcher(Queue outQueue) {
         super(outQueue);
@@ -33,17 +33,19 @@ public class DDGURLFetcher extends URLFetcher {
                     URLEncoder.encode(topic, "UTF-8"));
             Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).get();
             // duckduckgo is better about this than google
-            Elements searchResults = contentsDoc.select("a.result__a");
+            Elements searchResults = contentsDoc.select("div#links div.links_main.links_deep a");
             // get their target urls
             for (Element el : searchResults) {
                 // YES
                 // JSOUP HANDLES REDIRECTS
                 String urlTarget = el.attr("href").toLowerCase();
                 boolean excluded = false;
-                for (String exclude : excludes) {
-                    if (urlTarget.contains(exclude.toLowerCase())) {
-                        excluded = true;
-                        break;
+                if (excludes != null) {
+                    for (String exclude : excludes) {
+                        if (urlTarget.contains(exclude.toLowerCase())) {
+                            excluded = true;
+                            break;
+                        }
                     }
                 }
                 if (!excluded) {
