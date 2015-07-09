@@ -8,6 +8,15 @@ import org.zalgosircular.extempfiller2.research.Article;
 public class TextFormatter implements ArticleFormatter {
     @Override
     public String format(Article article) {
-        return null;
+        final StringBuilder sb = new StringBuilder();
+        final String endl = System.getProperty("line.separator");
+        sb.append(article.getTitle());
+        sb.append(endl);
+        sb.append(article.getAuthor());
+        sb.append(endl);
+        sb.append(article.getDatePublished());
+        sb.append(endl);
+        sb.append(article.getContents());
+        return sb.toString();
     }
 }
