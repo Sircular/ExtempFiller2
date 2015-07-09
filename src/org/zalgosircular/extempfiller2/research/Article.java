@@ -20,6 +20,10 @@ public class Article {
         this.contents = contents;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public String getTitle() {
         return title;
     }
