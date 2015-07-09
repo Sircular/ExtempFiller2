@@ -43,10 +43,12 @@ public class GoogleURLFetcher extends URLFetcher {
                 // JSOUP HANDLES REDIRECTS
                 String urlTarget = el.attr("href").toLowerCase();
                 boolean excluded = false;
-                for (String exclude : excludes) {
-                    if (urlTarget.contains(exclude.toLowerCase())) {
-                        excluded = true;
-                        break;
+                if (excludes != null) {
+                    for (String exclude : excludes) {
+                        if (urlTarget.contains(exclude.toLowerCase())) {
+                            excluded = true;
+                            break;
+                        }
                     }
                 }
                 if (!excluded) {
