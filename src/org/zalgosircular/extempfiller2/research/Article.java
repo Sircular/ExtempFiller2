@@ -6,12 +6,14 @@ import java.util.Date;
  * Created by Walt on 7/8/2015.
  */
 public class Article {
+    private final String url;
     private final String title;
     private final String author;
     private final Date datePublished;
     private final String contents;
 
-    public Article(String title, String author, Date datePublished, String contents) {
+    public Article(String url, String title, String author, Date datePublished, String contents) {
+        this.url = url;
         this.title = title;
         this.author = author;
         this.datePublished = datePublished;

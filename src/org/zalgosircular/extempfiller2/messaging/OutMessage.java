@@ -11,9 +11,9 @@ import java.util.List;
 public class OutMessage {
     private Type messageType;
     private Object data;
-    public OutMessage(Type messageType, Object data) throws InvalidArgumentException {
+    public OutMessage(Type messageType, Object data) throws RuntimeException {
         if (!messageType.getDataType().isInstance(data)) {
-            throw new InvalidArgumentException(new String[] {"Improper data type for message type"});
+            throw new RuntimeException("Improper data type for message type");
         }
         this.messageType = messageType;
         this.data = data;
