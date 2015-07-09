@@ -41,6 +41,8 @@ public class GoogleURLFetcher extends URLFetcher {
                 // JSOUP HANDLES REDIRECTS
                 String urlTarget = el.attr("href");
                 urls.add(new URL(urlTarget));
+                if (urls.size() >= maxArticles)
+                    break;
             }
             return urls;
         } catch (UnsupportedEncodingException e) {
