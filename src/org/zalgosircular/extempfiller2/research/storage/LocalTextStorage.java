@@ -91,7 +91,8 @@ public class LocalTextStorage extends StorageFacility{
         try {
             Scanner sc = new Scanner(Paths.get(TOPICS_FILE));
             String line = "";
-            while((line = sc.nextLine()) != null) {
+            while(sc.hasNextLine()) {
+                line = sc.nextLine();
                 final String[] tokens = line.trim().split(SEP);
                 final String longName = tokens[0];
                 final String folderName = tokens[1];
@@ -111,25 +112,30 @@ public class LocalTextStorage extends StorageFacility{
 
     @Override
     public boolean save(Topic topic, Article article) {
-        //Save article
-        //keep cache current
-        String safeFolderName = "";
-        //New topic
-        if (!topics.contains(topic)) {
-            safeFolderName = StringSafety.charNumUnderscore(topic.getTopic());
-            topics.add(topic);
-            shortened.put(topic, safeFolderName);
-        }
-        //Just more articles
-        else {
-            safeFolderName = shortened.get(topic);
-        }
-        final String text = formatter.format(article);
-
-        final String articleDir = DIR + File.separator + safeFolderName;
-        final String safeFileName = StringSafety.charNumUnderscore(article.getTitle()) + ".txt";
-        final String fileName = articleDir + File.separator + safeFileName;
         try {
+            String safeFolderName = "";
+            //New topic
+            if (!topics.contains(topic)) {
+                //create dir
+                safeFolderName = StringSafety.charNumUnderscore(topic.getTopic());
+                Files.createDirectory(Paths.get(DIR + File.separator + safeFolderName));
+
+                //update cache
+                topics.add(topic);
+                shortened.put(topic, safeFolderName);
+            }
+            else {
+                safeFolderName = shortened.get(topic);
+            }
+            //article data
+            final String text = formatter.format(article);
+
+            final String articleDir = DIR + File.separator + safeFolderName;
+
+            //article file
+            final String safeFileName = StringSafety.charNumUnderscore(article.getTitle()) + ".txt";
+            //full path
+            final String fileName = articleDir + File.separator + safeFileName;
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         }
