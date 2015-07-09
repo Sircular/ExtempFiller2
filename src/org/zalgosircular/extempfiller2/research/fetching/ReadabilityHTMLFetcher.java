@@ -4,6 +4,9 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.HttpConnection;
 import org.zalgosircular.extempfiller2.authentication.KeyManager;
+import org.zalgosircular.extempfiller2.messaging.*;
+import org.zalgosircular.extempfiller2.messaging.Error;
+import org.zalgosircular.extempfiller2.research.Topic;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,14 +24,14 @@ public class ReadabilityHTMLFetcher extends HTMLFetcher{
         super(outQueue);
     }
 
-    public String getResponse(URI location) throws IOException {
+    public String getResponse(URI location, Topic topic) throws IOException {
         try {
             URI target = new URI(
                     String.format(REQUEST_FORMAT, location.toString(), KeyManager.getKey("readability"))
             );
-            return super.getResponse(target);
+            return super.getResponse(target, topic);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            this.outQueue.add(new OutMessage(OutMessage.Type.ERROR, new Error(topic, e)));
         }
         return null;
     }

@@ -18,7 +18,7 @@ public class Error {
         return topic;
     }
 
-    public Exception getEx() {
+    public Exception getException() {
         return ex;
     }
 

@@ -1,6 +1,7 @@
 package org.zalgosircular.extempfiller2.research.fetching;
 
 import org.zalgosircular.extempfiller2.authentication.KeyManager;
+import org.zalgosircular.extempfiller2.research.Topic;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class HTMLFetcher {
         this.outQueue = outQueue;
     }
 
-    public String getResponse(URI location) throws IOException {
+    public String getResponse(URI location, Topic topic) throws IOException {
         try {
             URL url = location.toURL();
             BufferedReader reader = new BufferedReader(

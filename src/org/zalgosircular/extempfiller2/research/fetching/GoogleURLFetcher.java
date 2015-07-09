@@ -55,6 +55,8 @@ public class GoogleURLFetcher extends URLFetcher {
                 }
             }
             return urls;
+        // normally I'd send messages, but these are programmer bugs, not errors
+        // that will really happen
         } catch (URISyntaxException e) {
             // extremely possible, but probably not
             e.printStackTrace();
