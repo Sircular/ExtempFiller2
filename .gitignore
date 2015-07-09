@@ -1,0 +1,9 @@
+*.class
+*.iml
+*.jar
+*.war
+.idea/*
+libs/*
+out/*
+*.ipr
+*.iws
