@@ -33,11 +33,11 @@ public class KeyManager {
                     // we can actually initialize the keys, so we may as well
                     // create the object
                     Scanner keyScanner = new Scanner(keyFilePath);
-                    String line;
-                    while ((line = keyScanner.nextLine()) != null) {
-                        String[] tokens = line.split(Pattern.quote("|"));
+                    while (keyScanner.hasNext()) {
+                        String[] tokens = keyScanner.nextLine().split(Pattern.quote("|"));
                         keyMap.put(tokens[0], tokens[1]);
                     }
+                    keyScanner.close();
                 } else {
                     throw new RuntimeException(".extempKeys doesn't exist");
                 }
