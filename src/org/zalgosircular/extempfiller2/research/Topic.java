@@ -23,4 +23,9 @@ public class Topic {
     public void setArticleCount(int articleCount) {
         this.articleCount = articleCount;
     }
+
+    @Override
+    public String toString() {
+        return topic;
+    }
 }

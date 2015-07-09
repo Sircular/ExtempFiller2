@@ -10,7 +10,7 @@ public class ExtempFiller2 {
 
     public static void main(String[] args) {
         System.out.println("Hello world!");
-        Message m = new Message(OutMessages.DEBUG);
+        Message m = new Message(OutMessages.DEBUG, "derp");
         System.out.println(m.getType().name());
     }
 }

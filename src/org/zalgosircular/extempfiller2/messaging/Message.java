@@ -16,4 +16,8 @@ public class Message {
     public Object getData() {
         return data;
     }
+    @Override
+    public  String toString() {
+        return String.format("Message(%s, %s)", e.name(), data.toString());
+    }
 }

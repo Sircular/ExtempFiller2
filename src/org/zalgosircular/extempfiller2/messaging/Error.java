@@ -21,4 +21,9 @@ public class Error {
     public Exception getEx() {
         return ex;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Error(%s, %s)", topic.toString(), ex.toString());
+    }
 }
