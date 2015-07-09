@@ -22,7 +22,7 @@ public class DDGURLFetcher extends URLFetcher {
     private final String QUERY_STRING = "http://duckduckgo.com/?q=%s";
 
     public DDGURLFetcher(Queue outQueue) {
-        super (outQueue);
+        super(outQueue);
     }
 
     public List<URI> fetchURLs(String topic, int maxArticles, List<String> excludes) throws IOException {

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Logan Lembke on 7/8/2015.
  */
-public class LocalTextStorage extends StorageFacility{
+public class LocalTextStorage extends StorageFacility {
     private final static String DIR = "topics";
     private final static String TOPICS_FILE = DIR + File.separator + "topicsList.txt";
     private final static String SEP = "||";
@@ -21,6 +21,7 @@ public class LocalTextStorage extends StorageFacility{
     private final HashMap<Topic, String> shortened;
     private final TextFormatter formatter;
     private boolean loaded = false;
+
     public LocalTextStorage(Queue outQueue) {
         super(outQueue);
         this.topics = new LinkedList<Topic>();
@@ -30,18 +31,17 @@ public class LocalTextStorage extends StorageFacility{
 
     @Override
     public boolean open() {
-        if(!Files.exists(Paths.get(DIR))) {
+        if (!Files.exists(Paths.get(DIR))) {
             try {
                 Files.createDirectory(Paths.get(DIR));
             } catch (IOException e) {
                 return false;
             }
         }
-        if(!Files.exists(Paths.get(TOPICS_FILE))) {
+        if (!Files.exists(Paths.get(TOPICS_FILE))) {
             try {
                 Files.createFile(Paths.get(TOPICS_FILE));
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 return false;
             }
         }
@@ -51,8 +51,7 @@ public class LocalTextStorage extends StorageFacility{
     @Override
     public boolean close() {
         final StringBuilder sb = new StringBuilder();
-        for (Topic t : topics)
-        {
+        for (Topic t : topics) {
             sb.append(t.getTopic());
             sb.append(SEP);
             sb.append(shortened.get(t));
@@ -73,7 +72,7 @@ public class LocalTextStorage extends StorageFacility{
     @Override
     public boolean exists(final String topic) {
         if (!loaded) {
-        //implementation 1
+            //implementation 1
             final String safeName = StringSafety.charNumScore255(topic);
             return Files.exists(Paths.get(DIR + File.separator + safeName));
         }
@@ -91,7 +90,7 @@ public class LocalTextStorage extends StorageFacility{
         try {
             Scanner sc = new Scanner(Paths.get(TOPICS_FILE));
             String line = "";
-            while(sc.hasNextLine()) {
+            while (sc.hasNextLine()) {
                 line = sc.nextLine();
                 final String[] tokens = line.trim().split(Pattern.quote(SEP));
                 final String longName = tokens[0];
@@ -103,8 +102,7 @@ public class LocalTextStorage extends StorageFacility{
                 topics.add(t);
                 shortened.put(t, folderName);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return null;
         }
         loaded = true;
@@ -124,8 +122,7 @@ public class LocalTextStorage extends StorageFacility{
                 //update cache
                 topics.add(topic);
                 shortened.put(topic, safeFolderName);
-            }
-            else {
+            } else {
                 safeFolderName = shortened.get(topic);
             }
             //article data
@@ -139,8 +136,7 @@ public class LocalTextStorage extends StorageFacility{
             final String fileName = articleDir + File.separator + safeFileName;
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return false;
         }
         //update topic
@@ -151,8 +147,7 @@ public class LocalTextStorage extends StorageFacility{
     @Override
     public boolean saveMultiple(Topic topic, List<Article> articles) {
         boolean result = true;
-        for (Article a : articles)
-        {
+        for (Article a : articles) {
             result = save(topic, a);
             if (!result)
                 return false;
@@ -169,8 +164,7 @@ public class LocalTextStorage extends StorageFacility{
         //update filesystem
         try {
             DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(folderName));
-            for (Path p : stream)
-            {
+            for (Path p : stream) {
                 Files.delete(p);
             }
             Files.delete(Paths.get(folderName));

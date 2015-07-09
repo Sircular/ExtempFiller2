@@ -10,8 +10,10 @@ import java.util.Queue;
  */
 public abstract class URLFetcher {
     protected Queue outQueue;
+
     public URLFetcher(Queue outQueue) {
         this.outQueue = outQueue;
     }
+
     public abstract List<URI> fetchURLs(String topic, int maxResults, List<String> excludes) throws IOException;
 }

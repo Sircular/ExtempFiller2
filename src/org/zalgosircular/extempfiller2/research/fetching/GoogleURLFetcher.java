@@ -21,6 +21,7 @@ public class GoogleURLFetcher extends URLFetcher {
 
     private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36";
     private final String QUERY_STRING = "http://www.google.com/search?q=%s";
+
     public GoogleURLFetcher(Queue outQueue) {
         super(outQueue);
     }
@@ -55,8 +56,8 @@ public class GoogleURLFetcher extends URLFetcher {
                 }
             }
             return urls;
-        // normally I'd send messages, but these are programmer bugs, not errors
-        // that will really happen
+            // normally I'd send messages, but these are programmer bugs, not errors
+            // that will really happen
         } catch (URISyntaxException e) {
             // extremely possible, but probably not
             e.printStackTrace();

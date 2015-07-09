@@ -9,8 +9,10 @@ import java.util.Queue;
  */
 public abstract class ArticleParser {
     protected Queue outQueue;
+
     public ArticleParser(Queue outQueue) {
         this.outQueue = outQueue;
     }
+
     public abstract Article parse(String contents);
 }

@@ -432,13 +432,13 @@ public class EvernoteClient {
                 throw edam;
         }
 
-       // logger.info("Successfully created a new tag with GUID: "
-       //         + newTag.getGuid() + " and name: " + newTag.getName());
+        // logger.info("Successfully created a new tag with GUID: "
+        //         + newTag.getGuid() + " and name: " + newTag.getName());
 
         // Create a notebook for holding notes with desired tag names
         Notebook tagNotebook = getNotebook("Tag Names");
         if (tagNotebook == null) {
-        //    logger.info("Creating Tag Names Notebook");
+            //    logger.info("Creating Tag Names Notebook");
             tagNotebook = createNotebook("Tag Names");
         }
 
@@ -491,7 +491,7 @@ public class EvernoteClient {
     private void validateTagsNotebook() throws Exception {
         //logger.info("Validating Tags Notebook");
         if (getNotebook("Tag Names") == null) {
-        //    logger.info("Creating Tag Names Notebook");
+            //    logger.info("Creating Tag Names Notebook");
             createNotebook("Tag Names");
         }
     }

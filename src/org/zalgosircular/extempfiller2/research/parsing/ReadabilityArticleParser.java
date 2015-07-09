@@ -1,21 +1,15 @@
 package org.zalgosircular.extempfiller2.research.parsing;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
-import org.zalgosircular.extempfiller2.research.fetching.ReadabilityHTMLFetcher;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Queue;
 
 /**
@@ -29,6 +23,7 @@ public class ReadabilityArticleParser extends ArticleParser {
         super(outQueue);
         formatter = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
     }
+
     public Article parse(String htmlContents) {
         // create a jsoup document
         Document doc = Jsoup.parse(htmlContents);

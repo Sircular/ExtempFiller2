@@ -11,14 +11,22 @@ import java.util.Queue;
  */
 public abstract class StorageFacility {
     protected Queue outQueue;
+
     public StorageFacility(Queue outQueue) {
         this.outQueue = outQueue;
     }
+
     public abstract boolean open();
+
     public abstract boolean close();
+
     public abstract boolean exists(String topic);
+
     public abstract List<Topic> load();
+
     public abstract boolean save(Topic topic, Article article);
+
     public abstract boolean saveMultiple(Topic topic, List<Article> articles);
+
     public abstract boolean delete(Topic topic);
 }

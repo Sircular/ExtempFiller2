@@ -1,6 +1,5 @@
 package org.zalgosircular.extempfiller2.messaging;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.zalgosircular.extempfiller2.research.Topic;
 
 import java.util.List;
@@ -11,6 +10,7 @@ import java.util.List;
 public class OutMessage {
     private Type messageType;
     private Object data;
+
     public OutMessage(Type messageType, Object data) throws RuntimeException {
         if (!messageType.getDataType().isInstance(data)) {
             throw new RuntimeException("Improper data type for message type");
@@ -18,14 +18,17 @@ public class OutMessage {
         this.messageType = messageType;
         this.data = data;
     }
+
     public Type getMessageType() {
         return messageType;
     }
+
     public Object getData() {
         return data;
     }
+
     @Override
-    public  String toString() {
+    public String toString() {
         return String.format("Message(%s, %s)", messageType.name(), messageType.getDataType().cast(data).toString());
     }
 
@@ -44,6 +47,7 @@ public class OutMessage {
         DELETED(Topic.class);
 
         private final Class dataType;
+
         Type(Class dataType) {
             this.dataType = dataType;
         }

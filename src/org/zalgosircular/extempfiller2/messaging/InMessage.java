@@ -8,6 +8,7 @@ import org.zalgosircular.extempfiller2.research.Topic;
 public class InMessage {
     private Type messageType;
     private Object data;
+
     public InMessage(Type messageType, Object data) throws RuntimeException {
         if (!messageType.getDataType().isInstance(data)) {
             throw new RuntimeException("Improper data type for message type");
@@ -15,6 +16,7 @@ public class InMessage {
         this.messageType = messageType;
         this.data = data;
     }
+
     public Type getMessageType() {
         return messageType;
     }
@@ -24,7 +26,7 @@ public class InMessage {
     }
 
     @Override
-    public  String toString() {
+    public String toString() {
         return String.format("Message(%s, %s)", messageType.name(), messageType.getDataType().cast(data).toString());
     }
 
@@ -39,6 +41,7 @@ public class InMessage {
         CLOSE(Object.class);
 
         private final Class dataType;
+
         Type(Class dataType) {
             this.dataType = dataType;
         }
