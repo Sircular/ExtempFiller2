@@ -26,7 +26,7 @@ public class KeyManager {
 
     private static boolean initMap() {
         if (keyMap == null) {
-            keyMap = new HashMap<>();
+            keyMap = new HashMap<String, String>();
             return true;
         }
         return false;

@@ -5,7 +5,7 @@ package org.zalgosircular.extempfiller2.research.storage;
  */
 //Converts topic strings to filesystem save versions
 public class StringSafety {
-    public static String charNumUnderscore(String s) {
+    public static String charNumScore255(String s) {
         int len = s.length();
         return s.replaceAll(" ", "_").replaceAll("\\W+", "").substring(0, len > 255 ? 255 : len);
     }

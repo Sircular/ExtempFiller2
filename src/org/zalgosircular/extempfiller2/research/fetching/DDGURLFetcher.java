@@ -26,7 +26,7 @@ public class DDGURLFetcher extends URLFetcher {
     }
 
     public List<URI> fetchURLs(String topic, int maxArticles, List<String> excludes) throws IOException {
-        List<URI> urls = new ArrayList<>();
+        List<URI> urls = new ArrayList<URI>();
         try {
             // convert the topic to a duckduckgo search query
             String queryURL = String.format(QUERY_STRING,
