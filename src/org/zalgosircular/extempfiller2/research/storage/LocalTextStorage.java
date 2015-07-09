@@ -6,10 +6,9 @@ import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by Logan Lembke on 7/8/2015.
@@ -86,6 +85,7 @@ public class LocalTextStorage extends StorageFacility{
         return false;
     }
 
+    //loads cache
     @Override
     public List<Topic> load() {
         try {
@@ -93,11 +93,12 @@ public class LocalTextStorage extends StorageFacility{
             String line = "";
             while(sc.hasNextLine()) {
                 line = sc.nextLine();
-                final String[] tokens = line.trim().split(SEP);
+                final String[] tokens = line.trim().split(Pattern.quote(SEP));
                 final String longName = tokens[0];
                 final String folderName = tokens[1];
                 final int articleCount = Integer.parseInt(tokens[2]);
                 final Topic t = new Topic(longName);
+
                 t.setArticleCount(articleCount);
                 topics.add(t);
                 shortened.put(t, folderName);
@@ -142,6 +143,8 @@ public class LocalTextStorage extends StorageFacility{
         catch (IOException e) {
             return false;
         }
+        //update topic
+        topic.setArticleCount(topic.getArticleCount() + 1);
         return true;
     }
 
@@ -160,9 +163,16 @@ public class LocalTextStorage extends StorageFacility{
     @Override
     public boolean delete(Topic topic) {
         final String folderName = DIR + File.separator + shortened.get(topic);
+        //update cache
         topics.remove(topic);
         shortened.remove(topic);
+        //update filesystem
         try {
+            DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(folderName));
+            for (Path p : stream)
+            {
+                Files.delete(p);
+            }
             Files.delete(Paths.get(folderName));
         } catch (IOException e) {
             return false;
