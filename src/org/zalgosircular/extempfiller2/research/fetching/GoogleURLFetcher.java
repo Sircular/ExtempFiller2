@@ -7,6 +7,8 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -24,8 +26,8 @@ public class GoogleURLFetcher extends URLFetcher {
         super(outQueue);
     }
 
-    public List<URL> fetchURLs(String topic, int maxArticles, List<String> excludes) throws IOException {
-        List<URL> urls = new ArrayList<URL>();
+    public List<URI> fetchURLs(String topic, int maxArticles, List<String> excludes) throws IOException {
+        List<URI> urls = new ArrayList<>();
         try {
             // convert the topic to a google search query
             String queryURL = String.format("http://www.google.com/search?q=%s",
@@ -40,11 +42,14 @@ public class GoogleURLFetcher extends URLFetcher {
                 // YES
                 // JSOUP HANDLES REDIRECTS
                 String urlTarget = el.attr("href");
-                urls.add(new URL(urlTarget));
+                urls.add(new URI(urlTarget));
                 if (urls.size() >= maxArticles)
                     break;
             }
             return urls;
+        } catch (URISyntaxException e) {
+            // extremely possible, but probably not
+            e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             // this shouldn't happen, except in initial writing
             e.printStackTrace();

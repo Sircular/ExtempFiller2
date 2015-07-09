@@ -1,6 +1,7 @@
 package org.zalgosircular.extempfiller2.research.fetching;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Queue;
@@ -13,5 +14,5 @@ public abstract class URLFetcher {
     public URLFetcher(Queue outQueue) {
         this.outQueue = outQueue;
     }
-    public abstract List<URL> fetchURLs(String topic, int maxResults, List<String> excludes) throws IOException;
+    public abstract List<URI> fetchURLs(String topic, int maxResults, List<String> excludes) throws IOException;
 }
