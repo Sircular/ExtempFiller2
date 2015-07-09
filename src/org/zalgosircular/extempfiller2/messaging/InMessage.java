@@ -10,7 +10,7 @@ public class InMessage {
     private Object data;
 
     public InMessage(Type messageType, Object data) throws RuntimeException {
-        if (!messageType.getDataType().isInstance(data)) {
+        if (data != null && !messageType.getDataType().isInstance(data)) {
             throw new RuntimeException("Improper data type for message type");
         }
         this.messageType = messageType;
@@ -27,7 +27,8 @@ public class InMessage {
 
     @Override
     public String toString() {
-        return String.format("Message(%s, %s)", messageType.name(), messageType.getDataType().cast(data).toString());
+        return String.format("Message(%s, %s)", messageType.name(), data == null ?
+                "null" : messageType.getDataType().cast(data).toString());
     }
 
     /**

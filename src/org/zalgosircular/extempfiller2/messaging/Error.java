@@ -24,6 +24,7 @@ public class Error {
 
     @Override
     public String toString() {
-        return String.format("Error(%s, %s)", topic.toString(), ex.toString());
+        return String.format("Error(%s, %s)", topic == null ? "null" : topic.toString(),
+                ex == null ? "null" : ex.toString());
     }
 }

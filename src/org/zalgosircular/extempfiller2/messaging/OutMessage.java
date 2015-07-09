@@ -12,7 +12,7 @@ public class OutMessage {
     private Object data;
 
     public OutMessage(Type messageType, Object data) throws RuntimeException {
-        if (!messageType.getDataType().isInstance(data)) {
+        if (data != null && !messageType.getDataType().isInstance(data)) {
             throw new RuntimeException("Improper data type for message type");
         }
         this.messageType = messageType;
@@ -29,7 +29,8 @@ public class OutMessage {
 
     @Override
     public String toString() {
-        return String.format("Message(%s, %s)", messageType.name(), messageType.getDataType().cast(data).toString());
+        return String.format("Message(%s, %s)", messageType.name(), data == null ?
+                "null" : messageType.getDataType().cast(data).toString());
     }
 
     /**
@@ -40,7 +41,7 @@ public class OutMessage {
         SEARCHING(Topic.class),
         SAVING(Topic.class),
         DONE(Topic.class),
-        ERROR(Error.class),
+        ERROR(org.zalgosircular.extempfiller2.messaging.Error.class),
         LOADING(Object.class), // because we pass null
         LOADED(List.class),
         DELETING(Topic.class),
