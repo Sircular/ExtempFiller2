@@ -18,6 +18,8 @@ import java.util.Queue;
  */
 public class GoogleURLFetcher extends URLFetcher {
 
+    private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36";
+    private final String QUERY_STRING = "";
     public GoogleURLFetcher(Queue outQueue) {
         super(outQueue);
     }
@@ -28,15 +30,17 @@ public class GoogleURLFetcher extends URLFetcher {
             // convert the topic to a google search query
             String queryURL = String.format("http://www.google.com/search?q=%s",
                     URLEncoder.encode(topic, "UTF-8"));
-            Document contentsDoc = Jsoup.connect(queryURL).get();
-            // get just the search result <cite> tags
-            // the <a> tags contain google redirection links,
-            // but <cite> tags don't
-            Elements searchResults = contentsDoc.select("div#ires li.g div.s div.kv cite");
+            Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).get();
+            // so it turns out that the cite tags sometimes truncate
+            // the urls, so I have to go in and get the href stuff,
+            // then parse out all the redirection. UGH.
+            Elements searchResults = contentsDoc.select("div#ires li.g h3.r a");
             // get their target urls
             for (Element el : searchResults) {
-                String target = el.text();
-                urls.add(new URL(target));
+                // YES
+                // JSOUP HANDLES REDIRECTS
+                String urlTarget = el.attr("href");
+                urls.add(new URL(urlTarget));
             }
             return urls;
         } catch (UnsupportedEncodingException e) {
