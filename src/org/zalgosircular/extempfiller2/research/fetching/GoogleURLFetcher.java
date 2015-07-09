@@ -41,10 +41,19 @@ public class GoogleURLFetcher extends URLFetcher {
             for (Element el : searchResults) {
                 // YES
                 // JSOUP HANDLES REDIRECTS
-                String urlTarget = el.attr("href");
-                urls.add(new URI(urlTarget));
-                if (urls.size() >= maxArticles)
-                    break;
+                String urlTarget = el.attr("href").toLowerCase();
+                boolean excluded = false;
+                for (String exclude : excludes) {
+                    if (urlTarget.contains(exclude.toLowerCase())) {
+                        excluded = true;
+                        break;
+                    }
+                }
+                if (!excluded) {
+                    urls.add(new URI(urlTarget));
+                    if (urls.size() >= maxArticles)
+                        break;
+                }
             }
             return urls;
         } catch (URISyntaxException e) {
