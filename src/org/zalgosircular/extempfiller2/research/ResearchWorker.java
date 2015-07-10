@@ -94,5 +94,6 @@ public class ResearchWorker implements Runnable {
                 outQueue.add(new OutMessage(OutMessage.Type.ERROR, new Error(null, e)));
             }
         }
+        outQueue.add(new OutMessage(OutMessage.Type.CLOSED, null));
     }
 }

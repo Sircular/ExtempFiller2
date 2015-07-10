@@ -44,6 +44,7 @@ public class OutMessage {
         ERROR(org.zalgosircular.extempfiller2.messaging.Error.class),
         LOADING(Object.class), // because we pass null
         LOADED(List.class),
+        CLOSED(Object.class),
         DELETING(Topic.class),
         DELETED(Topic.class);
 
