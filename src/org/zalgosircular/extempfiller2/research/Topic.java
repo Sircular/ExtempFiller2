@@ -28,4 +28,10 @@ public class Topic {
     public String toString() {
         return topic;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return (o instanceof Topic && ((Topic) o).getTopic().equals(topic));
+    }
+
 }
