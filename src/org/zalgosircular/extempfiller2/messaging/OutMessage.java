@@ -29,8 +29,9 @@ public class OutMessage {
 
     @Override
     public String toString() {
-        return String.format("Message(%s, %s)", messageType.name(), data == null ?
-                "null" : messageType.getDataType().cast(data).toString());
+        return String.format("Message(%s, %s)", messageType.name(),
+                data == null ? "null" :
+                        messageType.getDataType().cast(data).toString());
     }
 
     /**
@@ -40,8 +41,9 @@ public class OutMessage {
         DEBUG(String.class),
         SEARCHING(Topic.class),
         SAVING(Topic.class),
+        SAVED(SavedMessage.class),
         DONE(Topic.class),
-        ERROR(org.zalgosircular.extempfiller2.messaging.Error.class),
+        ERROR(ErrorMessage.class),
         LOADING(Object.class), // because we pass null
         LOADED(List.class),
         CLOSED(Object.class),

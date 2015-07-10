@@ -19,18 +19,18 @@ public class ReadabilityArticleParser extends ArticleParser {
 
     private final SimpleDateFormat formatter;
 
-    public ReadabilityArticleParser(Queue outQueue) {
+    public ReadabilityArticleParser(Queue<OutMessage> outQueue) {
         super(outQueue);
         formatter = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
     }
 
-    public Article parse(String htmlContents) {
+    public Article parse(String readabilityHTML) {
         // create a jsoup document
-        Document doc = Jsoup.parse(htmlContents);
-        String url = doc.select("url").text();
+        final Document doc = Jsoup.parse(readabilityHTML);
+        final String url = doc.select("url").text();
         //String content = ; // we'll do this later
-        String author = doc.select("author").text();
-        String rawDate = doc.select("date_published").text();
+        final String author = doc.select("author").text();
+        final String rawDate = doc.select("date_published").text();
         Date published = null;
         try {
             published = formatter.parse(rawDate);
@@ -40,19 +40,20 @@ public class ReadabilityArticleParser extends ArticleParser {
             this.outQueue.add(new OutMessage(OutMessage.Type.DEBUG, String.format(
                     "Could not parse date for page '%s'", url)));
         }
-        String title = doc.select("title").text();
-        String contents = doc.select("content").text(); // this also converts HTML entities
+        final String title = doc.select("title").text();
+        final String contents = doc.select("content").text(); // this also converts HTML entities
         // convert HTML to readable plaintext (some estimation techniques used)
-        Document contentDoc = Jsoup.parse(contents);
-        Elements paraElems = contentDoc.select("p, div:only-child > div");
+        final Document contentDoc = Jsoup.parse(contents);
+        // Logan: Some explanation would be nice here
+        final Elements paraElems = contentDoc.select("p, div:only-child > div");
 
-        StringBuilder textBuilder = new StringBuilder();
+        final StringBuilder textBuilder = new StringBuilder();
         final String endl = System.getProperty("line.separator");
 
         for (Element e : paraElems) {
             // filter out the divs with children
-            if (!(e.nodeName() == "div" && e.select("p, div").size() > 0))
-                textBuilder.append(e.text()).append(endl).append(endl);
+            if (!(e.nodeName().equals("div") && e.select("p, div").size() > 0))
+                textBuilder.append(e.text()).append(endl);
         }
 
 

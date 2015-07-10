@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research.storage;
 
+import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
@@ -22,7 +23,7 @@ public class LocalTextStorage extends StorageFacility {
     private final TextFormatter formatter;
     private boolean loaded = false;
 
-    public LocalTextStorage(Queue outQueue) {
+    public LocalTextStorage(Queue<OutMessage> outQueue) {
         super(outQueue);
         this.topics = new LinkedList<Topic>();
         this.shortened = new HashMap<Topic, String>();
@@ -51,13 +52,14 @@ public class LocalTextStorage extends StorageFacility {
     @Override
     public boolean close() {
         final StringBuilder sb = new StringBuilder();
+        final String endl = System.getProperty("line.separator");
         for (Topic t : topics) {
             sb.append(t.getTopic());
             sb.append(SEP);
             sb.append(shortened.get(t));
             sb.append(SEP);
             sb.append(t.getArticleCount());
-            sb.append(System.getProperty("line.separator"));
+            sb.append(endl);
         }
         final String cache = sb.toString();
         try {
@@ -89,7 +91,7 @@ public class LocalTextStorage extends StorageFacility {
     public List<Topic> load() {
         try {
             Scanner sc = new Scanner(Paths.get(TOPICS_FILE));
-            String line = "";
+            String line;
             while (sc.hasNextLine()) {
                 line = sc.nextLine();
                 final String[] tokens = line.trim().split(Pattern.quote(SEP));
@@ -112,7 +114,7 @@ public class LocalTextStorage extends StorageFacility {
     @Override
     public boolean save(Topic topic, Article article) {
         try {
-            String safeFolderName = "";
+            String safeFolderName;
             //New topic
             if (!topics.contains(topic)) {
                 //create dir
@@ -146,7 +148,7 @@ public class LocalTextStorage extends StorageFacility {
 
     @Override
     public boolean saveMultiple(Topic topic, List<Article> articles) {
-        boolean result = true;
+        boolean result;
         for (Article a : articles) {
             result = save(topic, a);
             if (!result)

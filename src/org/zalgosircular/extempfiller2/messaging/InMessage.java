@@ -27,8 +27,9 @@ public class InMessage {
 
     @Override
     public String toString() {
-        return String.format("Message(%s, %s)", messageType.name(), data == null ?
-                "null" : messageType.getDataType().cast(data).toString());
+        return String.format("Message(%s, %s)", messageType.name(),
+                data == null ? "null" :
+                        messageType.getDataType().cast(data).toString());
     }
 
     /**

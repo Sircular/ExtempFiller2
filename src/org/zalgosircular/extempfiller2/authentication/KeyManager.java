@@ -12,46 +12,43 @@ import java.util.regex.Pattern;
  * Created by Walt on 7/8/2015.
  */
 public class KeyManager {
-    private final static String FILENAME = ".extempKeys";
+    private final static String FILENAME = ".extemp.keys";
     private static HashMap<String, String> keyMap;
+    private final static String SEP = "|";
 
-    private static boolean initMap() {
-        if (keyMap == null) {
-            keyMap = new HashMap<String, String>();
-            return true;
+    private static void initMap() throws IOException {
+        keyMap = new HashMap<String, String>();
+        // initialize the map for the first time
+        final Path keyFilePath = Paths.get(FILENAME);
+        if (Files.exists(keyFilePath)) {
+            // we can actually initialize the keys, so we may as well
+            // create the object
+            final Scanner keyScanner = new Scanner(keyFilePath);
+            while (keyScanner.hasNext()) {
+                final String[] tokens = keyScanner.nextLine().split(Pattern.quote(SEP));
+                keyMap.put(tokens[0], tokens[1]);
+            }
+            keyScanner.close();
+        } else {
+            throw new RuntimeException(FILENAME + " doesn't exist");
         }
-        return false;
     }
 
     public static String getKey(String account) {
+        //First access
         if (keyMap == null) {
             try {
                 initMap();
-                // initialize the map for the first time
-                Path keyFilePath = Paths.get(FILENAME);
-                if (Files.exists(keyFilePath)) {
-                    // we can actually initialize the keys, so we may as well
-                    // create the object
-                    Scanner keyScanner = new Scanner(keyFilePath);
-                    while (keyScanner.hasNext()) {
-                        String[] tokens = keyScanner.nextLine().split(Pattern.quote("|"));
-                        keyMap.put(tokens[0], tokens[1]);
-                    }
-                    keyScanner.close();
-                } else {
-                    throw new RuntimeException(".extempKeys doesn't exist");
-                }
             } catch (IOException e) {
-                // we know it exists, it's just the scanner being stupid
-                // just go with it. Scanner is a brat
+                //Happens when the file is inaccessible for operating system reasons (permissions etc)
+                e.printStackTrace();
                 return null;
             }
         }
         // we can finally actually get the keys
         if (keyMap.containsKey(account)) {
             return keyMap.get(account);
-        } else {
-            return null;
         }
+        return null;
     }
 }

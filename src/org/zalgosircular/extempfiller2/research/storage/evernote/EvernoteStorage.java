@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research.storage.evernote;
 
+import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
@@ -11,7 +12,7 @@ import java.util.Queue;
  * Created by Logan Lembke on 7/8/2015.
  */
 public class EvernoteStorage extends StorageFacility {
-    public EvernoteStorage(Queue outQueue) {
+    public EvernoteStorage(Queue<OutMessage> outQueue) {
         super(outQueue);
     }
 

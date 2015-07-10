@@ -31,7 +31,7 @@ public class Topic {
 
     @Override
     public boolean equals(Object o) {
-        return (o instanceof Topic && ((Topic) o).getTopic().equals(topic));
+        return (o instanceof Topic && ((Topic) o).getTopic().equals(this.topic));
     }
 
 }

@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research.storage;
 
+import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
 
@@ -10,9 +11,9 @@ import java.util.Queue;
  * Created by Walt on 7/8/2015.
  */
 public abstract class StorageFacility {
-    protected Queue outQueue;
+    protected final Queue<OutMessage> outQueue;
 
-    public StorageFacility(Queue outQueue) {
+    public StorageFacility(Queue<OutMessage> outQueue) {
         this.outQueue = outQueue;
     }
 

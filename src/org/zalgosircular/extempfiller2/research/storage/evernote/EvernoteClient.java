@@ -224,8 +224,7 @@ public class EvernoteClient {
     public synchronized List<Tag> getTags() throws Exception {
         try {
             checkRateTimer();
-            List<Tag> tags = noteStore.listTags();
-            return tags;
+            return noteStore.listTags();
         } catch (final EDAMSystemException edam) {
             if (edam.getErrorCode() == EDAMErrorCode.RATE_LIMIT_REACHED) {
                 //logger.severe("Waiting " + edam.getRateLimitDuration() + " seconds to continue...");
