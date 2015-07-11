@@ -95,6 +95,7 @@ public class CLI {
                 Thread.sleep(50);
             }
             String input = reader.readLine();
+            // split on one or more spaces
             return input.split("\\s+");
         }
 

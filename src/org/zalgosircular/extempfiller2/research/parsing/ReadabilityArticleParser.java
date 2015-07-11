@@ -44,7 +44,9 @@ public class ReadabilityArticleParser extends ArticleParser {
         final String contents = doc.select("content").text(); // this also converts HTML entities
         // convert HTML to readable plaintext (some estimation techniques used)
         final Document contentDoc = Jsoup.parse(contents);
-        // Logan: Some explanation would be nice here
+        // select all <p> tags and select <div> tags that are direct
+        // children of a <div> that has no sibling <divs>.
+        // for further explanation, see https://css-tricks.com/child-and-sibling-selectors/
         final Elements paraElems = contentDoc.select("p, div:only-child > div");
 
         final StringBuilder textBuilder = new StringBuilder();

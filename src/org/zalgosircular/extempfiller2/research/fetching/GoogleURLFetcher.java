@@ -36,9 +36,9 @@ public class GoogleURLFetcher extends URLFetcher {
             final String queryURL = String.format(QUERY_STRING,
                     URLEncoder.encode(topic.getTopic(), "UTF-8"));
             final Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).get();
-            // so it turns out that the cite tags sometimes truncate
-            // the urls, so I have to go in and get the href stuff,
-            // then parse out all the redirection. UGH.
+            // this is Google's peculiar structure for results
+            // if you wish to understand this, look at a google search
+            // page with JS disabled and inspect one of the result links.
             final Elements searchResults = contentsDoc.select("div#ires li.g h3.r a");
             // get their target urls
             String urlTarget;

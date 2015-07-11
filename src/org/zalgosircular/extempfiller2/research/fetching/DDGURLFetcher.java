@@ -36,7 +36,9 @@ public class DDGURLFetcher extends URLFetcher {
                     URLEncoder.encode(topic.getTopic(), "UTF-8"));
             final Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).get();
             // duckduckgo is better about this than google
-            // Logan: An explanation of the selection would be nice
+            // this selects the a tag from a particular place in the webpage
+            // DDG has a div with just the results, and div.links_main.links_deep is each
+            // individual result
             final Elements searchResults = contentsDoc.select("div#links div.links_main.links_deep a");
             // get their target urls
             String urlTarget;
