@@ -19,4 +19,9 @@ public class TextFormatter implements ArticleFormatter {
         sb.append(article.getHTML());
         return sb.toString();
     }
+
+    @Override
+    public String getDefaultFileExtension() {
+        return ".txt";
+    }
 }
