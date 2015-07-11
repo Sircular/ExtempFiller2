@@ -7,4 +7,5 @@ import org.zalgosircular.extempfiller2.research.Article;
  */
 public interface ArticleFormatter {
     public String format(Article article);
+    public String getDefaultFileExtension();
 }
