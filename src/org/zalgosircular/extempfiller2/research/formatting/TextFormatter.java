@@ -16,7 +16,7 @@ public class TextFormatter implements ArticleFormatter {
         sb.append(endl);
         sb.append(article.getDatePublished());
         sb.append(endl);
-        sb.append(article.getContents());
+        sb.append(article.getHTML());
         return sb.toString();
     }
 }

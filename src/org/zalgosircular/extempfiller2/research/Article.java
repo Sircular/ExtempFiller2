@@ -10,14 +10,14 @@ public class Article {
     private final String title;
     private final String author;
     private final Date datePublished;
-    private final String contents;
+    private final String html;
 
-    public Article(String url, String title, String author, Date datePublished, String contents) {
+    public Article(String url, String title, String author, Date datePublished, String html) {
         this.url = url;
         this.title = title;
         this.author = author;
         this.datePublished = datePublished;
-        this.contents = contents;
+        this.html = html;
     }
 
     public String getUrl() {
@@ -36,7 +36,7 @@ public class Article {
         return datePublished;
     }
 
-    public String getContents() {
-        return contents;
+    public String getHTML() {
+        return html;
     }
 }
