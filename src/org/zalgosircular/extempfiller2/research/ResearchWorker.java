@@ -72,7 +72,7 @@ public class ResearchWorker implements Runnable {
                         outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
                         final List<URI> urls = urlFetcher.fetchURLs(addTopic, 10, null);
                         if (urls == null)
-                            return;
+                            break;
                         outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
                         for (URI url : urls) {
                             final String html = htmlFetcher.getResponse(url, addTopic);
