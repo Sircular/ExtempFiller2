@@ -41,24 +41,8 @@ public class ReadabilityArticleParser extends ArticleParser {
                     "Could not parse date for page '%s'", url)));
         }
         final String title = doc.select("title").text();
-        final String contents = doc.select("content").text(); // this also converts HTML entities
-        // convert HTML to readable plaintext (some estimation techniques used)
-        final Document contentDoc = Jsoup.parse(contents);
-        // select all <p> tags and select <div> tags that are direct
-        // children of a <div> that has no sibling <divs>.
-        // for further explanation, see https://css-tricks.com/child-and-sibling-selectors/
-        final Elements paraElems = contentDoc.select("p, div:only-child > div");
+        final String html = doc.select("content").text(); // this also converts HTML entities
 
-        final StringBuilder textBuilder = new StringBuilder();
-        final String endl = System.getProperty("line.separator");
-
-        for (Element e : paraElems) {
-            // filter out the divs with children
-            if (!(e.nodeName().equals("div") && e.select("p, div").size() > 0))
-                textBuilder.append(e.text()).append(endl);
-        }
-
-
-        return new Article(url, title, author, published, textBuilder.toString());
+        return new Article(url, title, author, published, html);
     }
 }
