@@ -28,7 +28,7 @@ public class DDGURLFetcher extends URLFetcher {
         super(outQueue);
     }
 
-    public List<URI> fetchURLs(Topic topic, List<String> excludes) {
+    public List<URI> fetchURLs(Topic topic, int maxArticles, List<String> excludes) {
         final List<URI> urls = new ArrayList<URI>();
         try {
             // convert the topic to a duckduckgo search query
@@ -54,6 +54,8 @@ public class DDGURLFetcher extends URLFetcher {
                     }
                 }
                 urls.add(new URI(urlTarget));
+                if (urls.size() >= maxArticles)
+                    break;
             }
             return urls;
         } catch (URISyntaxException e) {

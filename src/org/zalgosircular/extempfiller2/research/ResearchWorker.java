@@ -13,7 +13,6 @@ import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
 
 import java.net.URI;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -73,24 +72,20 @@ public class ResearchWorker implements Runnable {
                         final String topicStr = (String) msg.getData();
                         final Topic addTopic = new Topic(topicStr);
                         outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
-                        final List<URI> urls = urlFetcher.fetchURLs(addTopic, null);
+                        final List<URI> urls = urlFetcher.fetchURLs(addTopic, MAX_ARTICLES, null);
                         if (urls == null)
                             break;
                         outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
-                        Iterator<URI> it = urls.iterator();
-                        int articleCount = 0;
-                        while (articleCount < MAX_ARTICLES && it.hasNext()) {
-                            final String html = htmlFetcher.getResponse(it.next(), addTopic);
-                            if (html != null) {
-                                final Article article = parser.parse(html);
-                                if (storage.save(addTopic, article)) {
-                                    final SavedMessage savedMessage = new SavedMessage(article, addTopic);
-                                    outQueue.add(new OutMessage(OutMessage.Type.SAVED, savedMessage));
-                                    articleCount++;
-                                }
+                        for (URI url : urls) {
+                            final String html = htmlFetcher.getResponse(url, addTopic);
+                            if (html == null) {
+                                continue;
                             }
+                            final Article article = parser.parse(html);
+                            storage.save(addTopic, article);
+                            final SavedMessage savedMessage = new SavedMessage(article, addTopic);
+                            outQueue.add(new OutMessage(OutMessage.Type.SAVED, savedMessage));
                         }
-                        addTopic.setArticleCount(articleCount);
                         outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
                         break;
                     case DELETE:

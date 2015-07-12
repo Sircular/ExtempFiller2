@@ -17,5 +17,5 @@ public abstract class URLFetcher {
         this.outQueue = outQueue;
     }
 
-    public abstract List<URI> fetchURLs(Topic topic, List<String> excludes);
+    public abstract List<URI> fetchURLs(Topic topic, int maxResults, List<String> excludes);
 }
