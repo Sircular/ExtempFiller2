@@ -30,9 +30,9 @@ public class HTMLFormatter implements ArticleFormatter {
     // all tags that are not these will be
     // replaced with <div>
     private final List<String> ALLOWED_TAGS =
-            Arrays.asList(("a abbr acronym address area b bdo big blockquote br caption center" +
-                    "cite code col colgroup dd del dfn div dl dt em font h1 h2 h3 h4 h5 h6 hr i" +
-                    "img ins kbd li map ol p pre q s samp small span strike strong sub sup table" +
+            Arrays.asList(("a abbr acronym address area b bdo big blockquote br caption center " +
+                    "cite code col colgroup dd del dfn div dl dt em font h1 h2 h3 h4 h5 h6 hr i " +
+                    "img ins kbd li map ol p pre q s samp small span strike strong sub sup table " +
                     "tbody td tfoot th thead title tr tt u ul var xmp").split(" +"));
 
     // generate a <div> containing information
@@ -54,7 +54,8 @@ public class HTMLFormatter implements ArticleFormatter {
             SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy");
             infoDiv.append(String.format("Date published: %s<br/>", format.format(date)));
         }
-        infoDiv.append(String.format("URL: %s", article.getUrl()));
+        infoDiv.append(String.format("URL: <a href=\"%s\">%s</a>", article.getUrl(),
+                article.getUrl()));
         return infoDiv;
     }
 
