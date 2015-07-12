@@ -43,7 +43,8 @@ public class HTMLFormatter implements ArticleFormatter {
         // add the information to the information paragraph
         infoDiv.append(String.format("Title: %s<br/>", article.getTitle()));
         String author = article.getAuthor();
-        if (author != null && author.length() > 0) {
+        if (author != null && author.length() > 0 &&
+                !author.equals("None")) {
             infoDiv.append(String.format("Author: %s<br/>", author));
         }
         Date date = article.getDatePublished();
