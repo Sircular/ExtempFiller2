@@ -22,14 +22,12 @@ public class LocalTextStorage extends StorageFacility {
     private final static String SEP = "||";
     private final LinkedList<Topic> topics;
     private final HashMap<Topic, String> shortened;
-    private final ArticleFormatter formatter;
     private boolean loaded = false;
 
-    public LocalTextStorage(Queue<OutMessage> outQueue) {
-        super(outQueue);
+    public LocalTextStorage(Queue<OutMessage> outQueue, ArticleFormatter formatter) {
+        super(outQueue, formatter);
         this.topics = new LinkedList<Topic>();
         this.shortened = new HashMap<Topic, String>();
-        this.formatter = new TextFormatter();
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.zalgosircular.extempfiller2.research.storage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
+import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 
 import java.util.List;
 import java.util.Queue;
@@ -12,8 +13,11 @@ import java.util.Queue;
  */
 public abstract class StorageFacility {
     protected final Queue<OutMessage> outQueue;
+    protected final ArticleFormatter formatter;
 
-    public StorageFacility(Queue<OutMessage> outQueue) {
+    // so we can use different formatters with the same facility
+    public StorageFacility(Queue<OutMessage> outQueue, ArticleFormatter formatter) {
+        this.formatter = formatter;
         this.outQueue = outQueue;
     }
 

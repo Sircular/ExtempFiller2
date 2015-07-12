@@ -11,6 +11,8 @@ import java.util.Queue;
  * Created by Walt on 7/8/2015.
  */
 public abstract class URLFetcher {
+    // todo: redo this class to be more "stream-like"
+    // each implementation can handle this stream differently
     protected final Queue<OutMessage> outQueue;
 
     public URLFetcher(Queue<OutMessage> outQueue) {

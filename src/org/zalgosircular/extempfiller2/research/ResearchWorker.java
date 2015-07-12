@@ -7,6 +7,7 @@ import org.zalgosircular.extempfiller2.research.fetching.GoogleURLFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.HTMLFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.ReadabilityHTMLFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.URLFetcher;
+import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
 import org.zalgosircular.extempfiller2.research.parsing.ArticleParser;
 import org.zalgosircular.extempfiller2.research.parsing.ReadabilityArticleParser;
 import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
@@ -36,10 +37,11 @@ public class ResearchWorker implements Runnable {
         inQueue = new ArrayBlockingQueue<InMessage>(1024);
         outQueue = new ArrayBlockingQueue<OutMessage>(1024);
 
+        // todo: add ways to change this at runtime
         urlFetcher = new GoogleURLFetcher(outQueue);
         htmlFetcher = new ReadabilityHTMLFetcher(outQueue);
         parser = new ReadabilityArticleParser(outQueue);
-        storage = new LocalTextStorage(outQueue);
+        storage = new LocalTextStorage(outQueue, new TextFormatter());
     }
 
     public BlockingQueue<InMessage> getInQueue() {
