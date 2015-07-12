@@ -29,7 +29,7 @@ public class GoogleURLFetcher extends URLFetcher {
         super(outQueue);
     }
 
-    public List<URI> fetchURLs(Topic topic, int maxArticles, List<String> excludes) {
+    public List<URI> fetchURLs(Topic topic, List<String> excludes) {
         final List<URI> urls = new ArrayList<URI>();
         try {
             // convert the topic to a google search query
@@ -54,8 +54,6 @@ public class GoogleURLFetcher extends URLFetcher {
                     }
                 }
                 urls.add(new URI(urlTarget));
-                if (urls.size() >= maxArticles)
-                    break;
             }
             return urls;
             // normally I'd send messages, but these are programmer bugs, not errors
