@@ -3,6 +3,7 @@ package org.zalgosircular.extempfiller2.research.storage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
+import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
 
 import java.io.File;
@@ -20,7 +21,7 @@ public class LocalTextStorage extends StorageFacility {
     private final static String SEP = "||";
     private final LinkedList<Topic> topics;
     private final HashMap<Topic, String> shortened;
-    private final TextFormatter formatter;
+    private final ArticleFormatter formatter;
     private boolean loaded = false;
 
     public LocalTextStorage(Queue<OutMessage> outQueue) {
@@ -133,7 +134,8 @@ public class LocalTextStorage extends StorageFacility {
             final String articleDir = DIR + File.separator + safeFolderName;
 
             //article file
-            final String safeFileName = StringSafety.charNumScore255(article.getTitle()) + ".txt";
+            final String safeFileName = StringSafety.charNumScore255(article.getTitle()) +
+                    formatter.getDefaultFileExtension();
             //full path
             final String fileName = articleDir + File.separator + safeFileName;
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),
