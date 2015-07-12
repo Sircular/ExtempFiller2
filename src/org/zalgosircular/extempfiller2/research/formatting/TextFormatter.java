@@ -1,5 +1,7 @@
 package org.zalgosircular.extempfiller2.research.formatting;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.zalgosircular.extempfiller2.research.Article;
 
 /**
@@ -16,7 +18,9 @@ public class TextFormatter implements ArticleFormatter {
         sb.append(endl);
         sb.append(article.getDatePublished());
         sb.append(endl);
-        sb.append(article.getHTML());
+        Document doc = Jsoup.parse(article.getHTML());
+        String text = doc.body().text();
+        sb.append(text);
         return sb.toString();
     }
 
