@@ -64,14 +64,14 @@ public class CLI {
                             research(words);
                         } else if (command.equals("delete")) {
                             delete(words);
-                        } else if (command.equals("help")) {
-                            //Little bit of output code....
-                            System.out.println("Commands: research [topic], delete [topic], exit, help");
                         } else if (command.equals("exit") ||
                                 command.equals("quit") ||
                                 command.equals("close")) {
                             inQueue.add(new InMessage(InMessage.Type.CLOSE, null));
                             running = false;
+                        } else {
+                            //Little bit of output code....
+                            System.out.println("Commands: research [topic], delete [topic], exit, help");
                         }
                     }
                 } catch (InterruptedException e) {
