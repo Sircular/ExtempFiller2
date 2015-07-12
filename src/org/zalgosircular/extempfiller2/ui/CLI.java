@@ -165,7 +165,8 @@ public class CLI {
                             break;
                         case DONE:
                             topic = (Topic) msg.getData();
-                            System.out.println("Finished researching topic: " + topic.getTopic());
+                            System.out.println(String.format("Found total of %d articles for topic: %s",
+                                    topic.getArticleCount(), topic.getTopic()));
                             break;
                         case ERROR:
                             final ErrorMessage e = (ErrorMessage) msg.getData();

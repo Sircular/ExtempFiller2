@@ -78,17 +78,19 @@ public class ResearchWorker implements Runnable {
                             break;
                         outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
                         Iterator<URI> it = urls.iterator();
-                        for (int i = 0; i < MAX_ARTICLES && it.hasNext();) {
+                        int articleCount = 0;
+                        while (articleCount < MAX_ARTICLES && it.hasNext()) {
                             final String html = htmlFetcher.getResponse(it.next(), addTopic);
                             if (html != null) {
                                 final Article article = parser.parse(html);
                                 if (storage.save(addTopic, article)) {
                                     final SavedMessage savedMessage = new SavedMessage(article, addTopic);
                                     outQueue.add(new OutMessage(OutMessage.Type.SAVED, savedMessage));
-                                    i++;
+                                    articleCount++;
                                 }
                             }
                         }
+                        addTopic.setArticleCount(articleCount);
                         outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
                         break;
                     case DELETE:
