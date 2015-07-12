@@ -1,8 +1,11 @@
 package org.zalgosircular.extempfiller2.research.storage;
 
-import com.box.sdk.BoxAPIConnection;
+//import com.box.sdk.BoxAPIConnection;
+
+import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
+import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 
 import java.util.List;
 import java.util.Queue;
@@ -12,12 +15,12 @@ import java.util.Queue;
  */
 public class BoxStorage extends StorageFacility {
 
-    private BoxAPIConnection conn;
+    //private BoxAPIConnection conn;
 
-    public BoxStorage(Queue outQueue) {
-        super(outQueue);
+    public BoxStorage(Queue<OutMessage> outQueue, ArticleFormatter formatter) {
+        super(outQueue, formatter);
         // yet to be properly implemented
-        conn = new BoxAPIConnection("");
+        //conn = new BoxAPIConnection("");
     }
 
     @Override

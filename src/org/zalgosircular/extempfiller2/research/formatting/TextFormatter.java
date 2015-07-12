@@ -1,7 +1,5 @@
 package org.zalgosircular.extempfiller2.research.formatting;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.zalgosircular.extempfiller2.research.Article;
 
 /**
@@ -14,13 +12,17 @@ public class TextFormatter implements ArticleFormatter {
         final String endl = System.getProperty("line.separator");
         sb.append(article.getTitle());
         sb.append(endl);
-        sb.append(article.getAuthor());
+        if (article.getAuthor() != null && article.getAuthor().length() > 0 &&
+                !article.getAuthor().equals("None")) {
+            sb.append(article.getAuthor());
+            sb.append(endl);
+        }
+        if (article.getDatePublished() != null) {
+            sb.append(article.getDatePublished());
+            sb.append(endl);
+        }
         sb.append(endl);
-        sb.append(article.getDatePublished());
-        sb.append(endl);
-        Document doc = Jsoup.parse(article.getHTML());
-        String text = doc.body().text();
-        sb.append(text);
+        sb.append(article.getPlainText());
         return sb.toString();
     }
 

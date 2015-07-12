@@ -1,5 +1,7 @@
 package org.zalgosircular.extempfiller2.research;
 
+import org.jsoup.Jsoup;
+
 import java.util.Date;
 
 /**
@@ -11,6 +13,7 @@ public class Article {
     private final String author;
     private final Date datePublished;
     private final String html;
+    private final String plainText;
 
     public Article(String url, String title, String author, Date datePublished, String html) {
         this.url = url;
@@ -18,6 +21,7 @@ public class Article {
         this.author = author;
         this.datePublished = datePublished;
         this.html = html;
+        this.plainText = Jsoup.parse(html).body().text();
     }
 
     public String getUrl() {
@@ -38,5 +42,9 @@ public class Article {
 
     public String getHTML() {
         return html;
+    }
+
+    public String getPlainText() {
+        return plainText;
     }
 }

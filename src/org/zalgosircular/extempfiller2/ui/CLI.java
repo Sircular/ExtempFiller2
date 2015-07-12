@@ -42,6 +42,7 @@ public class CLI {
     private class InputRunnable implements Runnable {
         private final BlockingQueue<InMessage> inQueue;
         private boolean running;
+
         public InputRunnable(BlockingQueue<InMessage> inQueue) {
             this.inQueue = inQueue;
             this.running = false;
@@ -51,7 +52,7 @@ public class CLI {
             // this is some somewhat complex code, but it just
             // makes it possible to interrupt
             final BufferedReader reader = new BufferedReader(
-              new InputStreamReader(System.in)
+                    new InputStreamReader(System.in)
             );
             running = true;
             while (running && !Thread.interrupted()) {
@@ -170,7 +171,7 @@ public class CLI {
                             break;
                         case ERROR:
                             final ErrorMessage e = (ErrorMessage) msg.getData();
-                            System.out.println("[ERROR] Exception while researching.");
+                            System.err.println("[ERROR] Exception while researching.");
                             e.getException().printStackTrace();
                             break;
                         case LOADING:

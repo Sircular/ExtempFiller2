@@ -4,11 +4,9 @@ import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
-import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -137,8 +135,7 @@ public class LocalTextStorage extends StorageFacility {
                     formatter.getDefaultFileExtension();
             //full path
             final String fileName = articleDir + File.separator + safeFileName;
-            final Charset charset = StringSafety.getEncoding(text);
-            Files.write(Paths.get(fileName), text.getBytes(charset),
+            Files.write(Paths.get(fileName), text.getBytes("utf-8"),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             return false;

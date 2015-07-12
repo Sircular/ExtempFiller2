@@ -7,6 +7,7 @@ import org.zalgosircular.extempfiller2.research.fetching.GoogleURLFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.HTMLFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.ReadabilityHTMLFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.URLFetcher;
+import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
 import org.zalgosircular.extempfiller2.research.parsing.ArticleParser;
 import org.zalgosircular.extempfiller2.research.parsing.ReadabilityArticleParser;
@@ -31,6 +32,7 @@ public class ResearchWorker implements Runnable {
     private final URLFetcher urlFetcher;
     private final HTMLFetcher htmlFetcher;
     private final ArticleParser parser;
+    private final ArticleFormatter formatter;
     private final StorageFacility storage;
 
     public ResearchWorker() {
@@ -41,7 +43,8 @@ public class ResearchWorker implements Runnable {
         urlFetcher = new GoogleURLFetcher(outQueue);
         htmlFetcher = new ReadabilityHTMLFetcher(outQueue);
         parser = new ReadabilityArticleParser(outQueue);
-        storage = new LocalTextStorage(outQueue, new TextFormatter());
+        formatter = new TextFormatter();
+        storage = new LocalTextStorage(outQueue, formatter);
     }
 
     public BlockingQueue<InMessage> getInQueue() {
@@ -54,7 +57,7 @@ public class ResearchWorker implements Runnable {
 
     public void run() {
         boolean running = true;
-        while(running) {
+        while (running) {
             try {
                 final InMessage msg = inQueue.take();
                 switch (msg.getMessageType()) {

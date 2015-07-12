@@ -1,7 +1,5 @@
 package org.zalgosircular.extempfiller2.research.storage;
 
-import java.nio.charset.Charset;
-
 /**
  * Created by Logan Lembke on 7/8/2015.
  */
@@ -13,7 +11,9 @@ public class StringSafety {
         return tempStr.substring(0, len > 255 ? 255 : len);
     }
 
-    public static Charset getEncoding(String s) {
+    //TODO: Get rid of this.... strings in java are always unicode...
+
+    /*public static Charset getEncoding(String s) {
         // basic trial and error
         // we only need to test for ISO-8859-1
         final String[] possibles = {"ISO-8859-1"};
@@ -27,5 +27,5 @@ public class StringSafety {
         }
         // utf-8 is the default
         return Charset.forName("utf-8");
-    }
+    }*/
 }
