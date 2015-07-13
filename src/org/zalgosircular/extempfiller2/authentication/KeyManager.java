@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -34,6 +35,23 @@ public class KeyManager {
         }
     }
 
+    // this is called every putKey; since we don't know when the
+    // program is closing, the only other option would be to
+    // set a timer (eugh)
+    private static void saveMap() throws IOException {
+        StringBuilder output = new StringBuilder();
+        for (String name : keyMap.keySet()) {
+            output.append(name);
+            output.append(SEP);
+            output.append(keyMap.get(name));
+            output.append('\n');
+        }
+
+        Files.write(Paths.get(FILENAME), output.toString().getBytes(),
+                StandardOpenOption.WRITE);
+
+    }
+
     public static String getKey(String account) {
         //First access
         if (keyMap == null) {
@@ -51,4 +69,22 @@ public class KeyManager {
         }
         return null;
     }
+
+    public static void putKey(String account, String key) {
+        if (keyMap == null) {
+            try {
+                initMap();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        keyMap.put(account, key);
+        try {
+            saveMap();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
 }
