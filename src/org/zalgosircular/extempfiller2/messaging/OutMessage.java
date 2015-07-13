@@ -43,6 +43,7 @@ public class OutMessage {
         SAVING(Topic.class),
         SAVED(SavedMessage.class),
         DONE(Topic.class),
+        ALREADY_RESEARCHED(Topic.class),
         ERROR(ErrorMessage.class),
         LOADING(Object.class), // because we pass null
         LOADED(List.class),

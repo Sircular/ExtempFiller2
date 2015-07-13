@@ -169,6 +169,10 @@ public class CLI {
                             System.out.println(String.format("Found total of %d articles for topic: %s",
                                     topic.getArticleCount(), topic.getTopic()));
                             break;
+                        case ALREADY_RESEARCHED:
+                            topic = (Topic)msg.getData();
+                            System.out.println("Already researched topic: " + topic.getTopic());
+                            break;
                         case ERROR:
                             final ErrorMessage e = (ErrorMessage) msg.getData();
                             System.err.println("[ERROR] Exception while researching " + e.getTopic().toString());

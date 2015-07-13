@@ -65,20 +65,25 @@ public class ResearchWorker implements Runnable {
                     case RESEARCH:
                         final String topicStr = (String) msg.getData();
                         final Topic addTopic = new Topic(topicStr);
-                        outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
-                        final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
-                        if (articles.size() == 0) {
-                            break;
+                        // check to see if it's already been done.
+                        if (!storage.exists(topicStr)) {
+                            outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
+                            final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
+                            if (articles.size() == 0) {
+                                break;
+                            }
+                            outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
+                            for (Article article : articles) {
+                                storage.save(addTopic, article);
+                                outQueue.add(new OutMessage(
+                                        OutMessage.Type.SAVED,
+                                        new SavedMessage(article, addTopic)
+                                ));
+                            }
+                            outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
+                        } else {
+                            outQueue.add(new OutMessage(OutMessage.Type.ALREADY_RESEARCHED, addTopic));
                         }
-                        outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
-                        for (Article article : articles) {
-                            storage.save(addTopic, article);
-                            outQueue.add(new OutMessage(
-                                    OutMessage.Type.SAVED,
-                                    new SavedMessage(article, addTopic)
-                            ));
-                        }
-                        outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
                         break;
                     case DELETE:
                         final Topic delTopic = (Topic) msg.getData();
