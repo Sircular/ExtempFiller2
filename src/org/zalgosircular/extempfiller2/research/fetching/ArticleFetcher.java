@@ -1,0 +1,21 @@
+package org.zalgosircular.extempfiller2.research.fetching;
+
+import org.zalgosircular.extempfiller2.messaging.OutMessage;
+import org.zalgosircular.extempfiller2.research.Article;
+import org.zalgosircular.extempfiller2.research.Topic;
+
+import java.util.List;
+import java.util.Queue;
+
+/**
+ * Created by Logan Lembke on 7/12/2015.
+ */
+public abstract class ArticleFetcher {
+    protected final Queue<OutMessage> outQueue;
+
+    protected ArticleFetcher(Queue<OutMessage> outQueue) {
+        this.outQueue = outQueue;
+    }
+
+    public abstract List<Article> fetchArticles(Topic topic, int maxResults, List<String> excludes);
+}

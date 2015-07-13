@@ -40,7 +40,7 @@ public class EvernoteClient {
     private long rateTimer = 0;
 
     // How long to wait between each api request in milliseconds
-    private final int TIMER = 1000;
+    private static final int TIMER = 1000;
 
     /**
      * Creates a new instance of an Evernote client.

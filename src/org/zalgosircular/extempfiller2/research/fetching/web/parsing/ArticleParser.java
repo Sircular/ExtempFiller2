@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.research.parsing;
+package org.zalgosircular.extempfiller2.research.fetching.web.parsing;
 
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
@@ -11,7 +11,7 @@ import java.util.Queue;
 public abstract class ArticleParser {
     protected final Queue<OutMessage> outQueue;
 
-    public ArticleParser(Queue<OutMessage> outQueue) {
+    protected ArticleParser(Queue<OutMessage> outQueue) {
         this.outQueue = outQueue;
     }
 

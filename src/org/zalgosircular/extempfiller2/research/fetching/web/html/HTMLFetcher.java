@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.research.fetching;
+package org.zalgosircular.extempfiller2.research.fetching.web.html;
 
 import org.jsoup.Jsoup;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;

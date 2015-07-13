@@ -171,7 +171,7 @@ public class CLI {
                             break;
                         case ERROR:
                             final ErrorMessage e = (ErrorMessage) msg.getData();
-                            System.err.println("[ERROR] Exception while researching.");
+                            System.err.println("[ERROR] Exception while researching " + e.getTopic().toString());
                             e.getException().printStackTrace();
                             break;
                         case LOADING:

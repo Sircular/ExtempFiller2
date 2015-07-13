@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.research.parsing;
+package org.zalgosircular.extempfiller2.research.fetching.web.parsing;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

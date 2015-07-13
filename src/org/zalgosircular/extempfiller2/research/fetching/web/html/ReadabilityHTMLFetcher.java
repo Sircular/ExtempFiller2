@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.research.fetching;
+package org.zalgosircular.extempfiller2.research.fetching.web.html;
 
 import org.zalgosircular.extempfiller2.authentication.KeyManager;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
@@ -13,7 +13,7 @@ import java.util.Queue;
  * Created by Walt on 7/8/2015.
  */
 public class ReadabilityHTMLFetcher extends HTMLFetcher {
-    private final String REQUEST_FORMAT = "https://readability.com/api/content/v1/parser?url=%s&token=%s&format=xml";
+    private static final String REQUEST_FORMAT = "https://readability.com/api/content/v1/parser?url=%s&token=%s&format=xml";
 
     public ReadabilityHTMLFetcher(Queue<OutMessage> outQueue) {
         super(outQueue);

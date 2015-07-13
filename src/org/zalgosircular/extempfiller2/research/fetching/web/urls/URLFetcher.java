@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.research.fetching;
+package org.zalgosircular.extempfiller2.research.fetching.web.urls;
 
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
@@ -14,10 +14,18 @@ public abstract class URLFetcher {
     // todo: redo this class to be more "stream-like"
     // each implementation can handle this stream differently
     protected final Queue<OutMessage> outQueue;
+    protected final Topic topic;
+    protected final List<String> excludes;
 
-    public URLFetcher(Queue<OutMessage> outQueue) {
+    protected URLFetcher(Queue<OutMessage> outQueue,
+                         Topic topic,
+                         List<String> excludes) {
         this.outQueue = outQueue;
+        this.topic = topic;
+        this.excludes = excludes;
     }
 
-    public abstract List<URI> fetchURLs(Topic topic, int maxResults, List<String> excludes);
+    public abstract URI getNext();
+
+    public abstract boolean hasNext();
 }

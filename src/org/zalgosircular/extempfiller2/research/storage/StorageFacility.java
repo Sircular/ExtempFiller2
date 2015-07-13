@@ -16,7 +16,7 @@ public abstract class StorageFacility {
     protected final ArticleFormatter formatter;
 
     // so we can use different formatters with the same facility
-    public StorageFacility(Queue<OutMessage> outQueue, ArticleFormatter formatter) {
+    protected StorageFacility(Queue<OutMessage> outQueue, ArticleFormatter formatter) {
         this.formatter = formatter;
         this.outQueue = outQueue;
     }

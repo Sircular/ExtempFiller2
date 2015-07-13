@@ -3,18 +3,13 @@ package org.zalgosircular.extempfiller2.research;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.messaging.SavedMessage;
-import org.zalgosircular.extempfiller2.research.fetching.GoogleURLFetcher;
-import org.zalgosircular.extempfiller2.research.fetching.HTMLFetcher;
-import org.zalgosircular.extempfiller2.research.fetching.ReadabilityHTMLFetcher;
-import org.zalgosircular.extempfiller2.research.fetching.URLFetcher;
-import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
+import org.zalgosircular.extempfiller2.research.fetching.ArticleFetcher;
+import org.zalgosircular.extempfiller2.research.fetching.web.WebArticleFetcher;
+import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
-import org.zalgosircular.extempfiller2.research.parsing.ArticleParser;
-import org.zalgosircular.extempfiller2.research.parsing.ReadabilityArticleParser;
 import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
 
-import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -29,10 +24,7 @@ public class ResearchWorker implements Runnable {
     private final BlockingQueue<InMessage> inQueue;
     private final BlockingQueue<OutMessage> outQueue;
 
-    private final URLFetcher urlFetcher;
-    private final HTMLFetcher htmlFetcher;
-    private final ArticleParser parser;
-    private final ArticleFormatter formatter;
+    private final ArticleFetcher fetcher;
     private final StorageFacility storage;
 
     public ResearchWorker() {
@@ -40,11 +32,8 @@ public class ResearchWorker implements Runnable {
         outQueue = new ArrayBlockingQueue<OutMessage>(1024);
 
         // todo: add ways to change this at runtime
-        urlFetcher = new GoogleURLFetcher(outQueue);
-        htmlFetcher = new ReadabilityHTMLFetcher(outQueue);
-        parser = new ReadabilityArticleParser(outQueue);
-        formatter = new TextFormatter();
-        storage = new LocalTextStorage(outQueue, formatter);
+        fetcher = new WebArticleFetcher(outQueue, SEARCH_ENGINE.DDG);
+        storage = new LocalTextStorage(outQueue, new TextFormatter());
     }
 
     public BlockingQueue<InMessage> getInQueue() {
@@ -77,19 +66,17 @@ public class ResearchWorker implements Runnable {
                         final String topicStr = (String) msg.getData();
                         final Topic addTopic = new Topic(topicStr);
                         outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
-                        final List<URI> urls = urlFetcher.fetchURLs(addTopic, MAX_ARTICLES, null);
-                        if (urls == null)
+                        final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
+                        if (articles.size() == 0) {
                             break;
+                        }
                         outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
-                        for (URI url : urls) {
-                            final String html = htmlFetcher.getResponse(url, addTopic);
-                            if (html == null) {
-                                continue;
-                            }
-                            final Article article = parser.parse(html);
+                        for (Article article : articles) {
                             storage.save(addTopic, article);
-                            final SavedMessage savedMessage = new SavedMessage(article, addTopic);
-                            outQueue.add(new OutMessage(OutMessage.Type.SAVED, savedMessage));
+                            outQueue.add(new OutMessage(
+                                    OutMessage.Type.SAVED,
+                                    new SavedMessage(article, addTopic)
+                            ));
                         }
                         outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
                         break;
