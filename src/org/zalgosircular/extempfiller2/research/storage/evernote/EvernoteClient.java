@@ -15,10 +15,7 @@ import com.evernote.edam.type.NoteSortOrder;
 import com.evernote.edam.type.Notebook;
 import com.evernote.edam.type.Tag;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Bridges the gap between the Evernote API provided at
@@ -42,12 +39,17 @@ public class EvernoteClient {
     // How long to wait between each api request in milliseconds
     private static final int TIMER = 1000;
 
+    // basic caching so that we don't overload it with tag requests
+    private final Map<String, Tag> tagMap;
+
     /**
      * Creates a new instance of an Evernote client.
      *
      * @throws Exception All exceptions are thrown to the calling program
      */
     public EvernoteClient(EvernoteService type, String token) throws Exception {
+        tagMap = new HashMap<String, Tag>();
+
         final EvernoteAuth evernoteAuth = new EvernoteAuth(type, token);
         final ClientFactory factory = new ClientFactory(evernoteAuth);
 
@@ -270,9 +272,16 @@ public class EvernoteClient {
             name = name.substring(0, 99).trim();
         if (name.contains(","))
             name = name.replace(",", "");
-        for (final Tag tag : getTags())
-            if (tag.getName().equalsIgnoreCase(name))
-                return tag;
+        if (tagMap.containsKey(name)) {
+            return tagMap.get(name);
+        } else {
+            for (final Tag tag : getTags()) {
+                if (tag.getName().equalsIgnoreCase(name)) {
+                    tagMap.put(name, tag);
+                    return tag;
+                }
+            }
+        }
         return null;
     }
 
@@ -298,14 +307,7 @@ public class EvernoteClient {
             tagGuids.add(tag.getGuid());
         note.setTagGuids(tagGuids);
 
-        // Construct the skeleton enml
-        final String code = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-                + "<en-note>"
-                + "<p>" + content
-                + "</p>"
-                + "</en-note>";
-        note.setContent(code);
+        note.setContent(content);
 
         // Create an uninitialized note to hold the server note
         Note newNote;
