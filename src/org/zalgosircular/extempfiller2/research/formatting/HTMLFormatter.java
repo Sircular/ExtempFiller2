@@ -90,7 +90,7 @@ public class HTMLFormatter implements ArticleFormatter {
 
     @Override
     public String format(Article article) {
-        final Document doc = new Document(article.getUrl());
+        final Document doc = Jsoup.parse("");
         doc.title(article.getTitle());
         final Element body = doc.body();
 
