@@ -39,17 +39,21 @@ public class KeyManager {
     // program is closing, the only other option would be to
     // set a timer (eugh)
     private static void saveMap() throws IOException {
-        StringBuilder output = new StringBuilder();
-        for (String name : keyMap.keySet()) {
-            output.append(name);
-            output.append(SEP);
-            output.append(keyMap.get(name));
-            output.append('\n');
+        Path path = Paths.get(FILENAME);
+        if (Files.exists(path)) {
+            StringBuilder output = new StringBuilder();
+            for (String name : keyMap.keySet()) {
+                output.append(name);
+                output.append(SEP);
+                output.append(keyMap.get(name));
+                output.append('\n');
+            }
+
+            Files.write(path, output.toString().getBytes(),
+                    StandardOpenOption.WRITE);
+        } else {
+            throw new RuntimeException(FILENAME + " doesn't exist");
         }
-
-        Files.write(Paths.get(FILENAME), output.toString().getBytes(),
-                StandardOpenOption.WRITE);
-
     }
 
     public static String getKey(String account) {
