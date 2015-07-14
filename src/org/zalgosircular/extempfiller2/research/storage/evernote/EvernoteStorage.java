@@ -3,16 +3,14 @@ package org.zalgosircular.extempfiller2.research.storage.evernote;
 import com.evernote.auth.EvernoteService;
 import com.evernote.edam.type.Tag;
 import org.zalgosircular.extempfiller2.authentication.KeyManager;
+import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.research.formatting.ENMLFormatter;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
-import sun.awt.image.ImageWatched;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Created by Logan Lembke on 7/8/2015.
@@ -22,18 +20,21 @@ public class EvernoteStorage extends StorageFacility {
 
     public EvernoteStorage(Queue<OutMessage> outQueue, ENMLFormatter formatter) {
         super(outQueue, formatter);
-        try {
-            EvernoteClient newClient = new EvernoteClient(EvernoteService.SANDBOX, KeyManager.getKey("evernote")); // sandbox for now
-            client = newClient;
-        } catch (Exception e) { // we'll have to fix this
-            // idk what to do here
-            e.printStackTrace();
-        }
     }
 
     @Override
     public boolean open() {
         // because of the constructor, it's already open
+        try {
+            client = new EvernoteClient(EvernoteService.SANDBOX, KeyManager.getKey("evernote")); // sandbox for now
+        } catch (Exception e) { // we'll have to fix this
+            outQueue.add(
+                    new OutMessage(
+                            OutMessage.Type.ERROR,
+                            new ErrorMessage(null, e)
+                    )
+            );
+        }
         return client != null;
     }
 
@@ -56,11 +57,12 @@ public class EvernoteStorage extends StorageFacility {
     @Override
     public List<Topic> load() {
         try {
-            List<String> names = client.getFullyNamedTags();
+            Collection<Map.Entry<String, Tag>> names = client.getFullyNamedTags();
             List<Topic> topics = new LinkedList<Topic>();
-            for (String topic : names) {
-                Topic t = new Topic(topic);
-                Tag tag = client.getTag(topic);
+            for (Map.Entry<String, Tag> entry : names) {
+                Topic t = new Topic(entry.getKey());
+                Tag tag = entry.getValue();
+                //minus one for note with full name
                 int articleCount = client.getNotesByTag(tag, 1000).size()-1;
                 t.setArticleCount(articleCount);
                 topics.add(t);
