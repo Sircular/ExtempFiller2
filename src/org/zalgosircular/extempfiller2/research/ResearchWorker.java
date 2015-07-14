@@ -6,9 +6,11 @@ import org.zalgosircular.extempfiller2.messaging.SavedMessage;
 import org.zalgosircular.extempfiller2.research.fetching.ArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.WebArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
+import org.zalgosircular.extempfiller2.research.formatting.ENMLFormatter;
 import org.zalgosircular.extempfiller2.research.formatting.HTMLFormatter;
 import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
+import org.zalgosircular.extempfiller2.research.storage.evernote.EvernoteStorage;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -33,7 +35,7 @@ public class ResearchWorker implements Runnable {
 
         // todo: add ways to change this at runtime
         fetcher = new WebArticleFetcher(outQueue, SEARCH_ENGINE.GOOGLE);
-        storage = new LocalTextStorage(outQueue, new HTMLFormatter());
+        storage = new EvernoteStorage(outQueue, new ENMLFormatter());
     }
 
     public BlockingQueue<InMessage> getInQueue() {
@@ -73,13 +75,19 @@ public class ResearchWorker implements Runnable {
                                 break;
                             }
                             outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
+                            int articleCount = 0;
                             for (Article article : articles) {
-                                storage.save(addTopic, article);
-                                outQueue.add(new OutMessage(
-                                        OutMessage.Type.SAVED,
-                                        new SavedMessage(article, addTopic)
-                                ));
+                                if (storage.save(addTopic, article)) {
+                                    outQueue.add(new OutMessage(
+                                            OutMessage.Type.SAVED,
+                                            new SavedMessage(article, addTopic)
+                                    ));
+                                    articleCount++;
+                                }
+                                 // if it doesn't work, the storage has already
+                                // sent up an error message
                             }
+                            addTopic.setArticleCount(articleCount);
                             outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
                         } else {
                             outQueue.add(new OutMessage(OutMessage.Type.ALREADY_RESEARCHED, addTopic));
