@@ -11,14 +11,18 @@ public class ENMLFormatter extends HTMLFormatter implements ArticleFormatter {
     @Override
     public String format(Article article) {
         // we'll just reuse the methods from the HTMLFormatter
-        Element body = new Element(Tag.valueOf("en-note"), "");
-        Element infoDiv = generateInfoDiv(article);
-        Element contentDiv = new Element(Tag.valueOf("div"), "");
+        final Element body = new Element(Tag.valueOf("en-note"), "");
+        final Element infoDiv = generateInfoDiv(article);
+        final Element contentDiv = new Element(Tag.valueOf("div"), "");
         contentDiv.append(normalizeContent(article.getHTML()));
         body.appendChild(infoDiv);
         body.appendChild(contentDiv);
-
-        return body.toString();
+        final String header =
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                        System.getProperty("line.separator") +
+                        "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">" +
+                        System.getProperty("line.separator");
+        return header + body.toString();
     }
 
     @Override
