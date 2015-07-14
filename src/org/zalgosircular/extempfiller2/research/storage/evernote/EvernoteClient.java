@@ -299,6 +299,28 @@ public class EvernoteClient {
      * @throws Exception All exceptions are thrown to the calling program
      */
     public synchronized Note createTextNote(final String title, final String content, final Notebook notebook, final List<Tag> tags) throws Exception {
+        // For Text Notes
+        // Construct the skeleton enml
+        final String code = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+                + "<en-note>"
+                + "<p>" + content
+                + "</p>"
+                + "</en-note>";
+        return createENMLNote(title, code, notebook, tags);
+    }
+
+    /**
+     * Creates a note on the Evernote servers with a given title and given content within a given notebook and with given tags
+     *
+     * @param title    The title to name the note
+     * @param content  The enml to be held within the note
+     * @param notebook The notebook to contain the note
+     * @param tags     The tags to apply to the note
+     * @return The note created on the server
+     * @throws Exception All exceptions are thrown to the calling program
+     */
+    public synchronized Note createENMLNote(final String title, final String content, final Notebook notebook, final List<Tag> tags) throws Exception {
         // Create a local note
         final Note note = new Note();
 
@@ -310,15 +332,7 @@ public class EvernoteClient {
             tagGuids.add(tag.getGuid());
         note.setTagGuids(tagGuids);
 
-        // For Text Notes
-        // Construct the skeleton enml
-        final String code = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-                + "<en-note>"
-                + "<p>" + content
-                + "</p>"
-                + "</en-note>";
-        note.setContent(code);
+        note.setContent(content);
 
         // Create an uninitialized note to hold the server note
         Note newNote;

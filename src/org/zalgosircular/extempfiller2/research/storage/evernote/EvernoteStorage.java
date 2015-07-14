@@ -1,6 +1,7 @@
 package org.zalgosircular.extempfiller2.research.storage.evernote;
 
 import com.evernote.auth.EvernoteService;
+import com.evernote.edam.type.Notebook;
 import com.evernote.edam.type.Tag;
 import org.zalgosircular.extempfiller2.authentication.KeyManager;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
@@ -17,7 +18,7 @@ import java.util.*;
  */
 public class EvernoteStorage extends StorageFacility {
     private EvernoteClient client;
-
+    private static final String RESEARCH_NOTEBOOK = "Web Notes";
     public EvernoteStorage(Queue<OutMessage> outQueue, ENMLFormatter formatter) {
         super(outQueue, formatter);
     }
@@ -27,6 +28,10 @@ public class EvernoteStorage extends StorageFacility {
         // because of the constructor, it's already open
         try {
             client = new EvernoteClient(EvernoteService.SANDBOX, KeyManager.getKey("evernote")); // sandbox for now
+            Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
+            if (HTMLNotebook == null) {
+                client.createNotebook(RESEARCH_NOTEBOOK);
+            }
         } catch (Exception e) { // we'll have to fix this
             outQueue.add(
                     new OutMessage(
@@ -49,7 +54,14 @@ public class EvernoteStorage extends StorageFacility {
         try {
             return client.getTag(topic) != null;
         } catch (Exception e) {
-            e.printStackTrace();
+            final Topic erredTopic = new Topic(topic);
+            erredTopic.setArticleCount(-1);
+            outQueue.add(
+                    new OutMessage(
+                            OutMessage.Type.ERROR,
+                            new ErrorMessage(erredTopic, e)
+                    )
+            );
         }
         return false;
     }
@@ -69,7 +81,12 @@ public class EvernoteStorage extends StorageFacility {
             }
             return topics;
         } catch (Exception e) {
-            e.printStackTrace();
+            outQueue.add(
+                    new OutMessage(
+                            OutMessage.Type.ERROR,
+                            new ErrorMessage(null, e)
+                    )
+            );
         }
         return null;
     }
@@ -78,23 +95,20 @@ public class EvernoteStorage extends StorageFacility {
     public boolean save(Topic topic, Article article) {
         try {
             Tag tag = client.getTag(topic.getTopic());
-            boolean wasNull = false;
             if (tag == null) {
-                wasNull = true;
                 tag = client.createTag(topic.getTopic());
             }
             String contents = formatter.format(article);
-            // methinks we need to reimplement this
-            LinkedList<Tag> tagList = new LinkedList<Tag>();
-            tagList.add(tag);
-            if (wasNull) // generate skeleton ENML here
-                client.createTextNote("Desired Tag Name", "<en-note><p>"+topic.getTopic()+"</p></en-note>",
-                        client.getNotebook("Tag Names"), tagList);
-            client.createTextNote(article.getTitle(), contents,
-                    client.getNotebook("Web Notes"), tagList);
+            client.createENMLNote(article.getTitle(), contents,
+                    client.getNotebook(RESEARCH_NOTEBOOK), Arrays.asList(tag));
             return true;
-        } catch (Exception e) { // NEEDS TO BE FIXED
-            e.printStackTrace();
+        } catch (Exception e) {
+            outQueue.add(
+                    new OutMessage(
+                            OutMessage.Type.ERROR,
+                            new ErrorMessage(topic, e)
+                    )
+            );
         }
         return false;
     }
