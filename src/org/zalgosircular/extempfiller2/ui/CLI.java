@@ -9,6 +9,7 @@ import org.zalgosircular.extempfiller2.research.Topic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -65,6 +66,8 @@ public class CLI {
                             research(words);
                         } else if (command.equals("delete")) {
                             delete(words);
+                        } else if (command.equals("view")) {
+                            inQueue.add(new InMessage(InMessage.Type.LOAD, null));
                         } else if (command.equals("exit") ||
                                 command.equals("quit") ||
                                 command.equals("close")) {
@@ -182,7 +185,13 @@ public class CLI {
                             System.out.println("Loading saved topics...");
                             break;
                         case LOADED:
-                            System.out.println("Loaded topic cache.");
+                            System.out.println("Currently researched topics:");
+                            List<Topic> topics = (List<Topic>)msg.getData();
+                            for (Topic t : topics) {
+                                System.out.println(String.format(
+                                        "[%2d] %s", t.getArticleCount(), t.getTopic()
+                                ));
+                            }
                             break;
                         case CLOSED:
                             System.out.println("Researcher closed.");
