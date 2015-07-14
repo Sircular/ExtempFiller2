@@ -8,6 +8,7 @@ import org.zalgosircular.extempfiller2.research.Article;
  * Created by Walt on 7/11/2015.
  */
 public class ENMLFormatter extends HTMLFormatter implements ArticleFormatter {
+
     @Override
     public String format(Article article) {
         // we'll just reuse the methods from the HTMLFormatter
@@ -22,7 +23,9 @@ public class ENMLFormatter extends HTMLFormatter implements ArticleFormatter {
                         System.getProperty("line.separator") +
                         "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">" +
                         System.getProperty("line.separator");
-        return header + body.toString();
+        String bodyOutput = body.toString();
+        // we have to do this for evernote; wtf
+        return header + bodyOutput.replaceAll("<br( /)?>", "<br></br>");
     }
 
     @Override
