@@ -40,7 +40,7 @@ public class EvernoteClient {
     private static final int TIMER = 1000;
 
     // basic caching so that we don't overload it with tag requests
-    private final Map<String, Tag> tagMap;
+    private Map<String, Tag> tagCache;
 
     /**
      * Creates a new instance of an Evernote client.
@@ -48,8 +48,6 @@ public class EvernoteClient {
      * @throws Exception All exceptions are thrown to the calling program
      */
     public EvernoteClient(EvernoteService type, String token) throws Exception {
-        tagMap = new HashMap<String, Tag>();
-
         final EvernoteAuth evernoteAuth = new EvernoteAuth(type, token);
         final ClientFactory factory = new ClientFactory(evernoteAuth);
 
@@ -67,22 +65,7 @@ public class EvernoteClient {
 
         // Start api request timing
         checkRateTimer();
-        validateTagsNotebook();
-    }
-
-    public Notebook initHTMLNotebook() throws Exception {
-        try {
-            Notebook HTMLNotebook = getNotebook("Web Notes");
-            if (HTMLNotebook == null) {
-                //logger.info("Creating Web Notes Notebook");
-                return createNotebook("Web Notes");
-            } else {
-                return HTMLNotebook;
-            }
-        } catch (final Exception e) {
-            //logger.severe("Error while creating the Web Notes Notebook: " + e.getMessage());
-            throw e;
-        }
+        loadTagCache();
     }
 
     /**
@@ -243,18 +226,40 @@ public class EvernoteClient {
      * @return A List of the desired names of created tags based on the tags notebook
      * @throws Exception
      */
-    public List<String> getFullyNamedTags() throws Exception {
-        final LinkedList<String> tags = new LinkedList<String>();
+    public Collection<Map.Entry<String, Tag>> getFullyNamedTags() throws Exception {
+        if (tagCache != null && tagCache.size() != 0) {
+            return tagCache.entrySet();
+        }
+        final LinkedList<Map.Entry<String, Tag>> tags = new LinkedList<Map.Entry<String, Tag>>();
         final Notebook tagNotebook = getNotebook("Tag Names");
         final List<Note> notedTags = getNotesInNotebook(tagNotebook, 10000);
         String content;
+        String tagGUID;
+        Tag tag;
         for (final Note note : notedTags) {
             content = note.getContent();
             content = content.substring(
                     content.indexOf("<p>") + 3,
                     content.indexOf("</p>")
             );
-            tags.add(content);
+            tagGUID = note.getTagGuids().get(0);
+
+            //Raw access to notestore for performance
+            try {
+                checkRateTimer();
+                tag = noteStore.getTag(tagGUID);
+            } catch (final EDAMSystemException edam) {
+                // We are being throttled by Evernote
+                if (edam.getErrorCode() == EDAMErrorCode.RATE_LIMIT_REACHED) {
+                    //logger.severe("Waiting " + edam.getRateLimitDuration() + " seconds to continue...");
+                    Thread.sleep(edam.getRateLimitDuration() * 1000);
+                    // Always check the rate timer to make sure we do not overburden the server
+                    checkRateTimer();
+                    tag = noteStore.getTag(tagGUID);
+                } else
+                    throw edam;
+            }
+            tags.add(new AbstractMap.SimpleEntry<String, Tag>(content, tag));
         }
         return tags;
     }
@@ -272,14 +277,12 @@ public class EvernoteClient {
             name = name.substring(0, 99).trim();
         if (name.contains(","))
             name = name.replace(",", "");
-        if (tagMap.containsKey(name)) {
-            return tagMap.get(name);
-        } else {
-            for (final Tag tag : getTags()) {
-                if (tag.getName().equalsIgnoreCase(name)) {
-                    tagMap.put(name, tag);
-                    return tag;
-                }
+        if (tagCache.containsKey(name)) {
+            return tagCache.get(name);
+        }
+        for (final Tag tag : getTags()) {
+            if (tag.getName().equalsIgnoreCase(name)) {
+                return tag;
             }
         }
         return null;
@@ -307,7 +310,15 @@ public class EvernoteClient {
             tagGuids.add(tag.getGuid());
         note.setTagGuids(tagGuids);
 
-        note.setContent(content);
+        // For Text Notes
+        // Construct the skeleton enml
+        final String code = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
+                + "<en-note>"
+                + "<p>" + content
+                + "</p>"
+                + "</en-note>";
+        note.setContent(code);
 
         // Create an uninitialized note to hold the server note
         Note newNote;
@@ -415,7 +426,7 @@ public class EvernoteClient {
         realName = realName.replace(",", "");
         tag.setName(realName);
 
-        // Create an uninitialized notebook to hold the server notebook
+        // Create an uninitialized tag to hold the server tag
         Tag newTag;
         try {
             // Always check the rate timer to make sure we do not overburden the server
@@ -426,11 +437,11 @@ public class EvernoteClient {
             if (edam.getErrorCode() == EDAMErrorCode.RATE_LIMIT_REACHED) {
                 //logger.severe("Waiting " + edam.getRateLimitDuration() + " seconds to continue...");
                 Thread.sleep(edam.getRateLimitDuration() * 1000);
-                // Always check the rate timer to make sure we do not overburden the server
-                checkRateTimer();
+                checkRateTimer(); //should always be good
                 newTag = noteStore.createTag(tag);
-            } else
+            } else {
                 throw edam;
+            }
         }
 
         // logger.info("Successfully created a new tag with GUID: "
@@ -438,13 +449,16 @@ public class EvernoteClient {
 
         // Create a notebook for holding notes with desired tag names
         Notebook tagNotebook = getNotebook("Tag Names");
+        //should never happen
+        /*
         if (tagNotebook == null) {
             //    logger.info("Creating Tag Names Notebook");
             tagNotebook = createNotebook("Tag Names");
-        }
+        }*/
 
-        // If we had to shorten the name, create a note with the desired name
+        // Create a note with the desired name
         createTextNote("Desired Tag Name", desiredName, tagNotebook, Arrays.asList(newTag));
+        tagCache.put(desiredName, newTag);
         return newTag;
     }
 
@@ -460,6 +474,15 @@ public class EvernoteClient {
             for (final Note note : notes)
                 deleteNote(note);
         noteStore.expungeTag(tag.getGuid());
+        //Not the most efficient way of going about this but it works
+        //Sticking with hashmap because inserts should happen way more often
+        for (Iterator<Map.Entry<String, Tag>> iterator = tagCache.entrySet().iterator(); iterator.hasNext(); ) {
+            Map.Entry<String, Tag> entry = iterator.next();
+            if (entry.getValue().equals(tag)) {
+                iterator.remove();
+                break;
+            }
+        }
     }
 
     /**
@@ -489,11 +512,18 @@ public class EvernoteClient {
      *
      * @throws Exception All exceptions are thrown to the calling program
      */
-    private void validateTagsNotebook() throws Exception {
+    private void loadTagCache() throws Exception {
         //logger.info("Validating Tags Notebook");
         if (getNotebook("Tag Names") == null) {
             //    logger.info("Creating Tag Names Notebook");
             createNotebook("Tag Names");
+        }
+        Collection<Map.Entry<String, Tag>> tags = getFullyNamedTags();
+
+        //convert list to hashmap for performance
+        tagCache = new HashMap<String, Tag>(tags.size());
+        for (Map.Entry<String, Tag> tag : tags) {
+            tagCache.put(tag.getKey(), tag.getValue());
         }
     }
 

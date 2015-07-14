@@ -50,7 +50,7 @@ public class KeyManager {
             }
 
             Files.write(path, output.toString().getBytes(),
-                    StandardOpenOption.WRITE);
+                    StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
         } else {
             throw new RuntimeException(FILENAME + " doesn't exist");
         }
