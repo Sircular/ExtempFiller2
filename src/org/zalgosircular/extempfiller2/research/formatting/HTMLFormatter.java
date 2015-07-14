@@ -92,7 +92,7 @@ public class HTMLFormatter implements ArticleFormatter {
                 }
             }
         }
-        return body.html();
+        return body.html().replaceAll("<br( /)?>", "<br></br>");
     }
 
     @Override
