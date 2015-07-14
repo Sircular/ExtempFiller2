@@ -25,7 +25,7 @@ public class ENMLFormatter extends HTMLFormatter implements ArticleFormatter {
                         System.getProperty("line.separator");
         String bodyOutput = body.toString();
         // we have to do this for evernote; wtf
-        return header + bodyOutput;
+        return header + bodyOutput.replaceAll("<br( /)?>", "<br></br>");
     }
 
     @Override
