@@ -12,6 +12,7 @@ import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
 import org.zalgosircular.extempfiller2.research.storage.evernote.EvernoteStorage;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -69,26 +70,38 @@ public class ResearchWorker implements Runnable {
                         final Topic addTopic = new Topic(topicStr);
                         // check to see if it's already been done.
                         if (!storage.exists(topicStr)) {
-                            outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
-                            final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
-                            if (articles.size() == 0) {
-                                break;
-                            }
-                            outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
-                            int articleCount = 0;
-                            for (Article article : articles) {
-                                if (storage.save(addTopic, article)) {
-                                    outQueue.add(new OutMessage(
-                                            OutMessage.Type.SAVED,
-                                            new SavedMessage(article, addTopic)
-                                    ));
-                                    articleCount++;
+                            // check to see if it's been queued for deletion
+                            boolean deleted = false;
+                            Iterator<InMessage> mIt = inQueue.iterator();
+                            while (mIt.hasNext() && !deleted) {
+                                InMessage delMsg = mIt.next();
+                                if (delMsg.getMessageType() == InMessage.Type.DELETE &&
+                                        ((Topic)delMsg.getData()).equals(addTopic)) {
+                                    deleted = true;
+                                    mIt.remove();
                                 }
-                                 // if it doesn't work, the storage has already
-                                // sent up an error message
                             }
-                            addTopic.setArticleCount(articleCount);
-                            outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
+                            if (deleted) {
+                                outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
+                                final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
+                                if (articles.size() > 0) {
+                                    outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
+                                    int articleCount = 0;
+                                    for (Article article : articles) {
+                                        if (storage.save(addTopic, article)) {
+                                            outQueue.add(new OutMessage(
+                                                    OutMessage.Type.SAVED,
+                                                    new SavedMessage(article, addTopic)
+                                            ));
+                                            articleCount++;
+                                        }
+                                        // if it doesn't work, the storage has already
+                                        // sent up an error message
+                                    }
+                                    addTopic.setArticleCount(articleCount);
+                                    outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
+                                }
+                            }
                         } else {
                             outQueue.add(new OutMessage(OutMessage.Type.ALREADY_RESEARCHED, addTopic));
                         }
