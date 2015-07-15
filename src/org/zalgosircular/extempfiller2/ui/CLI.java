@@ -9,6 +9,9 @@ import org.zalgosircular.extempfiller2.research.Topic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -64,6 +67,8 @@ public class CLI {
 
                         if (command.equals("research")) {
                             research(words);
+                        } else if (command.equals("researchfile")) {
+                            researchFile(words);
                         } else if (command.equals("delete")) {
                             delete(words);
                         } else if (command.equals("view")) {
@@ -75,7 +80,7 @@ public class CLI {
                             running = false;
                         } else {
                             //Little bit of output code....
-                            System.out.println("Commands: research [topic], delete [topic], exit, help");
+                            System.out.println("Commands: research [topic], researchFile [file], delete [topic], view, exit, help");
                         }
                     }
                 } catch (InterruptedException e) {
@@ -113,6 +118,34 @@ public class CLI {
                 inQueue.add(new InMessage(InMessage.Type.RESEARCH, sb.toString()));
             } else {
                 System.err.println("Syntax: research <topic>");
+            }
+        }
+
+        private void researchFile(String[] words) {
+            if (words.length > 1) {
+                final StringBuilder sb = new StringBuilder(words[1]);
+                for (int i = 2; i < words.length; i++) {
+                    sb.append(' ');
+                    sb.append(words[i]);
+                }
+                final String pathStr = sb.toString();
+                final Path filePath = Paths.get(pathStr);
+                if (Files.exists(filePath)) {
+                    try {
+                        List<String> lines = Files.readAllLines(filePath);
+                        for (String line : lines) {
+                            inQueue.add(new InMessage(InMessage.Type.RESEARCH, line));
+                        }
+                        System.out.println(String.format("Queued %d topics for research.", lines.size()));
+                    } catch (IOException e){
+                        System.err.println("Could not read from file: "+pathStr);
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.err.println("No such file: "+pathStr);
+                }
+            } else {
+                System.err.println("Syntax: researchFile <file>");
             }
         }
 

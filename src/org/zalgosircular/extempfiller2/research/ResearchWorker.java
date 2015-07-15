@@ -83,7 +83,7 @@ public class ResearchWorker implements Runnable {
                                     mIt.remove();
                                 }
                             }
-                            if (deleted) {
+                            if (!deleted) {
                                 outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
                                 final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
                                 if (articles.size() > 0) {
