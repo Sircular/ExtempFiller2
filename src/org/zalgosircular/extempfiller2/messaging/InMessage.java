@@ -36,7 +36,8 @@ public class InMessage {
      * Created by Walt on 7/8/2015.
      */
     public static enum Type {
-        LOAD(Object.class), // because it's null
+        LOAD(Object.class), // reload from "filesystem"
+        GET(Object.class), // get from cache if possible
         RESEARCH(String.class),
         DELETE(Topic.class),
         OPEN(Object.class),

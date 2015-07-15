@@ -114,6 +114,7 @@ public class EvernoteStorage extends StorageFacility {
             String contents = formatter.format(article);
             client.createENMLNote(article.getTitle(), contents,
                     client.getNotebook(RESEARCH_NOTEBOOK), Arrays.asList(tag));
+            topicCache.add(topic);
             return true;
         } catch (Exception e) {
             outQueue.add(
@@ -144,6 +145,7 @@ public class EvernoteStorage extends StorageFacility {
                 // conveniently done for us
                 client.deleteTag(tag);
             }
+            topicCache.remove(topic);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

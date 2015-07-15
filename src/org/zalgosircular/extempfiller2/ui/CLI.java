@@ -67,7 +67,7 @@ public class CLI {
                         } else if (command.equals("delete")) {
                             delete(words);
                         } else if (command.equals("view")) {
-                            inQueue.add(new InMessage(InMessage.Type.LOAD, null));
+                            inQueue.add(new InMessage(InMessage.Type.GET, null));
                         } else if (command.equals("exit") ||
                                 command.equals("quit") ||
                                 command.equals("close")) {
@@ -185,6 +185,9 @@ public class CLI {
                             System.out.println("Loading saved topics...");
                             break;
                         case LOADED:
+                            System.out.println("Loaded topics.");
+                            break;
+                        case RETRIEVED:
                             System.out.println("Currently researched topics:");
                             List<Topic> topics = (List<Topic>)msg.getData();
                             for (Topic t : topics) {

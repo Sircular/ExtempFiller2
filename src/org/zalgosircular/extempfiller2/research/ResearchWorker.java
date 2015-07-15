@@ -63,6 +63,10 @@ public class ResearchWorker implements Runnable {
                         final List<Topic> topics = storage.loadResearched();
                         outQueue.add(new OutMessage(OutMessage.Type.LOADED, topics));
                         break;
+                    case GET:
+                        final List<Topic> topics1 = storage.getResearched();
+                        outQueue.add(new OutMessage(OutMessage.Type.RETRIEVED, topics1));
+                        break;
                     case RESEARCH:
                         final String topicStr = (String) msg.getData();
                         final Topic addTopic = new Topic(topicStr);

@@ -47,6 +47,7 @@ public class OutMessage {
         ERROR(ErrorMessage.class),
         LOADING(Object.class), // because we pass null
         LOADED(List.class),
+        RETRIEVED(List.class),
         CLOSED(Object.class),
         DELETING(Topic.class),
         DELETED(Topic.class);
