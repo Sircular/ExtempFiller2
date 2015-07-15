@@ -86,10 +86,11 @@ public class LocalTextStorage extends StorageFacility {
 
     //loads cache
     @Override
-    public List<Topic> load() {
+    public List<Topic> loadResearched() {
         try {
             Scanner sc = new Scanner(Paths.get(TOPICS_FILE));
             String line;
+            topics.clear();
             while (sc.hasNextLine()) {
                 line = sc.nextLine();
                 final String[] tokens = line.trim().split(Pattern.quote(SEP));
@@ -107,6 +108,14 @@ public class LocalTextStorage extends StorageFacility {
         }
         loaded = true;
         return topics;
+    }
+
+    public List<Topic> getResearched() {
+        if (topics == null) {
+            return loadResearched();
+        } else {
+            return topics; // maybe this should be cloned?
+        }
     }
 
     @Override

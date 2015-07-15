@@ -19,6 +19,8 @@ import java.util.*;
 public class EvernoteStorage extends StorageFacility {
     private EvernoteClient client;
     private static final String RESEARCH_NOTEBOOK = "Web Notes";
+    private List<Topic> topicCache = null;
+
     public EvernoteStorage(Queue<OutMessage> outQueue, ENMLFormatter formatter) {
         super(outQueue, formatter);
     }
@@ -67,7 +69,7 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public List<Topic> load() {
+    public List<Topic> loadResearched() {
         try {
             Collection<Map.Entry<String, Tag>> names = client.getFullyNamedTags();
             List<Topic> topics = new LinkedList<Topic>();
@@ -79,6 +81,8 @@ public class EvernoteStorage extends StorageFacility {
                 t.setArticleCount(articleCount);
                 topics.add(t);
             }
+            // store the cache
+            topicCache = topics;
             return topics;
         } catch (Exception e) {
             outQueue.add(
@@ -89,6 +93,15 @@ public class EvernoteStorage extends StorageFacility {
             );
         }
         return null;
+    }
+
+    @Override
+    public List<Topic> getResearched() {
+        if (topicCache == null) {
+            return loadResearched();
+        } else {
+            return topicCache;
+        }
     }
 
     @Override

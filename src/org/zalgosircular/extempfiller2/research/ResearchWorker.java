@@ -7,8 +7,6 @@ import org.zalgosircular.extempfiller2.research.fetching.ArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.WebArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.formatting.ENMLFormatter;
-import org.zalgosircular.extempfiller2.research.formatting.HTMLFormatter;
-import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
 import org.zalgosircular.extempfiller2.research.storage.evernote.EvernoteStorage;
 
@@ -62,7 +60,7 @@ public class ResearchWorker implements Runnable {
                         break;
                     case LOAD:
                         outQueue.add(new OutMessage(OutMessage.Type.LOADING, null));
-                        final List<Topic> topics = storage.load();
+                        final List<Topic> topics = storage.loadResearched();
                         outQueue.add(new OutMessage(OutMessage.Type.LOADED, topics));
                         break;
                     case RESEARCH:

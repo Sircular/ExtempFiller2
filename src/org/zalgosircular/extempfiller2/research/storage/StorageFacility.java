@@ -27,7 +27,9 @@ public abstract class StorageFacility {
 
     public abstract boolean exists(String topic);
 
-    public abstract List<Topic> load();
+    public abstract List<Topic> loadResearched();
+
+    public abstract List<Topic> getResearched(); // this one (should) load from cache
 
     public abstract boolean save(Topic topic, Article article);
 

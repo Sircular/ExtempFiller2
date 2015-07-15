@@ -39,9 +39,12 @@ public class BoxStorage extends StorageFacility {
     }
 
     @Override
-    public List<Topic> load() {
+    public List<Topic> loadResearched() {
         return null;
     }
+
+    @Override
+    public List<Topic> getResearched() { return null; }
 
     @Override
     public boolean save(Topic topic, Article article) {
