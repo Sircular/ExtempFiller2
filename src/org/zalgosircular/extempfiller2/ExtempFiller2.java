@@ -4,6 +4,7 @@ import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.ResearchWorker;
 import org.zalgosircular.extempfiller2.ui.CLI;
+import org.zalgosircular.extempfiller2.ui.gui.GUI;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -20,7 +21,7 @@ public class ExtempFiller2 {
         workerThread.start();
 
         // initialize the UI
-        CLI cli = new CLI(inQueue, outQueue);
-        cli.run();
+        GUI gui = new GUI(inQueue, outQueue);
+        gui.run();
     }
 }
