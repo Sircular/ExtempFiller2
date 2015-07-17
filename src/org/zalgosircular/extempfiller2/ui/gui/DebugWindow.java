@@ -7,20 +7,20 @@ import java.awt.*;
  * Created by Walt on 7/15/2015.
  */
 public class DebugWindow extends JFrame {
-    private final JList<String> output;
-    private final DefaultListModel<String> model;
+    private final JTextArea area;
 
     public DebugWindow() {
-        model = new DefaultListModel<String>();
-        output = new JList<String>(model);
-        output.setPreferredSize(new Dimension(640, 400));
-        this.add(output);
+        this.setTitle("ExtempFiller2 Debug");
+        area = new JTextArea();
+        area.setPreferredSize(new Dimension(640, 480));
+        area.setEditable(false);
+        this.add(area);
         this.pack();
         this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
     }
 
     public void addDebugMessage(String msg) {
-        model.addElement(msg);
-        output.updateUI();
+        area.append(msg+"\n");
+        this.validate();
     }
 }
