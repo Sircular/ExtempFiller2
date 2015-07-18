@@ -1,11 +1,14 @@
 package org.zalgosircular.extempfiller2.ui.gui;
 
+import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
+import org.zalgosircular.extempfiller2.ui.gui.TopicManagerPanel.TopicState;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -31,6 +34,7 @@ public class GUI {
         addDebugMessage("Initializing ExtempFiller2...");
 
         boolean running = true;
+        setWindowEnabled(false); // wait until topics are loaded
         while (running) {
             try {
                 OutMessage msg = outQueue.take();
@@ -38,9 +42,12 @@ public class GUI {
                 switch (msg.getMessageType()) {
                     case LOADING:
                         addDebugMessage("Loading topics from filesystem...");
+                        setWindowEnabled(false);
                         break;
                     case LOADED:
                         addDebugMessage("Loaded topics from filesystem.");
+                        setWindowEnabled(true);
+                        window.setTopics((List<Topic>)msg.getData());
                         break;
                     case RETRIEVED:
                         addDebugMessage("Loaded topics from cache.");
@@ -69,9 +76,12 @@ public class GUI {
                         setTopicState(topic, TopicState.DELETED);
                         break;
                     case ERROR:
-                        topic = (Topic)msg.getData();
-                        addDebugMessage("Error researching message: "+topic.getTopic());
-                        setTopicState(topic, TopicState.ERROR);
+                        ErrorMessage error = (ErrorMessage)msg.getData();
+                        if (error.getTopic() != null) {
+                            addDebugMessage("Error researching message: " + error.getTopic().getTopic());
+                            setTopicState(error.getTopic(), TopicState.ERROR);
+                        }
+                        showError(error.getException().getMessage());
                         break;
                     case CLOSED:
                         closeWindow();
@@ -94,11 +104,29 @@ public class GUI {
         });
     }
 
+    private void showError(final String msg) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                window.showError(msg);
+            }
+        });
+    }
+
     private void setTopicState(final Topic topic, final TopicState state) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 window.setTopicState(topic, state);
+            }
+        });
+    }
+
+    private void setWindowEnabled(final boolean value) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                window.setEnabled(value);
             }
         });
     }
@@ -118,14 +146,4 @@ public class GUI {
             return;
         }
     }
-
-    public enum TopicState {
-        RESEARCHING,
-        RESEARCHED,
-        DELETING,
-        DELETED, // used to delete a topic from a list
-        ERROR
-    }
-
-
 }

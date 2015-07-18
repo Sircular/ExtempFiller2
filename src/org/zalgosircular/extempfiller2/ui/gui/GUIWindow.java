@@ -2,6 +2,7 @@ package org.zalgosircular.extempfiller2.ui.gui;
 
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
+import org.zalgosircular.extempfiller2.ui.gui.TopicManagerPanel.TopicState;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +19,7 @@ public class GUIWindow extends JFrame {
 
     private DebugWindow debugWindow;
     private Queue<InMessage> inQueue;
+    private TopicManagerPanel managerPanel;
 
     private JMenuBar menuBar;
 
@@ -27,6 +29,7 @@ public class GUIWindow extends JFrame {
     }
 
     public void init() {
+        this.setTitle("ExtempFiller2");
         this.setPreferredSize(new Dimension(640, 400));
         this.pack();
         // add a handler
@@ -40,37 +43,67 @@ public class GUIWindow extends JFrame {
         // set up the menu
         menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
-        JMenuItem closeItem = new JMenuItem("Close");
-        closeItem.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuItem("Close", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 close();
             }
-        });
-        fileMenu.add(closeItem);
+        }));
+
+        JMenu helpMenu = new JMenu("Help");
+        helpMenu.add(createMenuItem("Show Debug Window", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                debugWindow.setVisible(true);
+            }
+        }));
+
         menuBar.add(fileMenu);
+        menuBar.add(helpMenu);
         this.setJMenuBar(menuBar);
+
+        managerPanel = new TopicManagerPanel(inQueue);
+        this.add(managerPanel);
 
     }
 
+    // basic running methods
     private void close() {
         inQueue.add(new InMessage(InMessage.Type.CLOSE, null));
-        JOptionPane.showMessageDialog(null, "Closing ExtempFiller2...");
+        JOptionPane.showMessageDialog(this, "Closing ExtempFiller2...");
     }
 
     public void start() {
         this.setVisible(true);
-        this.debugWindow.setVisible(true);
         inQueue.add(new InMessage(InMessage.Type.OPEN, null));
         inQueue.add(new InMessage(InMessage.Type.LOAD, null));
     }
 
+    public void setEnabled(boolean value) {
+        managerPanel.setEnabled(value);
+    }
     public void addDebugMessage(String msg) {
         System.out.println(msg);
         debugWindow.addDebugMessage(msg);
     }
 
-    public void setTopicState(Topic topic, GUI.TopicState state) {
-        // do nothing for now
+    public void showError(String msg) {
+        addDebugMessage(msg);
+        JOptionPane.showMessageDialog(this, msg);
+    }
+
+    public void setTopicState(Topic topic, TopicState state) {
+        managerPanel.setTopicState(topic, state);
+    }
+
+    public void setTopics(java.util.List<Topic> topics) {
+        managerPanel.setTopics(topics);
+    }
+
+    // helper factory methods
+    private JMenuItem createMenuItem(String name, ActionListener listener) {
+        JMenuItem item = new JMenuItem(name);
+        item.addActionListener(listener);
+        return item;
     }
 }
