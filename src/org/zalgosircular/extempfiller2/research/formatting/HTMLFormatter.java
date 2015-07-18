@@ -4,7 +4,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Entities;
 import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.zalgosircular.extempfiller2.research.Article;

@@ -3,7 +3,6 @@ package org.zalgosircular.extempfiller2;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.ResearchWorker;
-import org.zalgosircular.extempfiller2.ui.CLI;
 import org.zalgosircular.extempfiller2.ui.gui.GUI;
 
 import java.util.concurrent.BlockingQueue;
