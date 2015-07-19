@@ -7,3 +7,4 @@ libs/*
 out/*
 *.ipr
 *.iws
+*.keys

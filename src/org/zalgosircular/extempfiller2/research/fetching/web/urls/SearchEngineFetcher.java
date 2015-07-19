@@ -22,6 +22,7 @@ import java.util.Queue;
  */
 public class SearchEngineFetcher extends URLFetcher {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36";
+    private static final int TIMEOUT = 10 * 1000;
     private final SEARCH_ENGINE searchEngine;
     private final Queue<URI> urls;
     private int results;
@@ -57,7 +58,7 @@ public class SearchEngineFetcher extends URLFetcher {
             // convert the topic to a duckduckgo search query
             final String queryURL = String.format(searchEngine.QUERY_STRING,
                     URLEncoder.encode(topic.getTopic(), "UTF-8"), results);
-            final Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).get();
+            final Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).timeout(TIMEOUT).get();
             // duckduckgo is better about this than google
             // this selects the a tag from a particular place in the webpage
             // DDG has a div with just the results, and div.links_main.links_deep is each

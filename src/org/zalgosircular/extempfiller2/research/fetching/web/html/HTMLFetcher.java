@@ -16,7 +16,7 @@ import java.util.Queue;
  */
 public class HTMLFetcher {
     protected final Queue<OutMessage> outQueue;
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 10 * 1000;
 
     public HTMLFetcher(Queue<OutMessage> outQueue) {
         this.outQueue = outQueue;

@@ -30,7 +30,7 @@ public class EvernoteStorage extends StorageFacility {
         // because of the constructor, it's already open
         try {
             client = new EvernoteClient(EvernoteService.SANDBOX, KeyManager.getKey("evernote")); // sandbox for now
-            Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
+            final Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
             if (HTMLNotebook == null) {
                 client.createNotebook(RESEARCH_NOTEBOOK);
             }
@@ -54,6 +54,7 @@ public class EvernoteStorage extends StorageFacility {
     @Override
     public boolean exists(String topic) {
         try {
+            //Cached in the client
             return client.getTag(topic) != null;
         } catch (Exception e) {
             final Topic erredTopic = new Topic(topic);
@@ -71,13 +72,13 @@ public class EvernoteStorage extends StorageFacility {
     @Override
     public List<Topic> loadResearched() {
         try {
-            Collection<Map.Entry<String, Tag>> names = client.getFullyNamedTags();
-            List<Topic> topics = new LinkedList<Topic>();
+            final Collection<Map.Entry<String, Tag>> names = client.getFullyNamedTags();
+            final List<Topic> topics = new LinkedList<Topic>();
             for (Map.Entry<String, Tag> entry : names) {
                 Topic t = new Topic(entry.getKey());
                 Tag tag = entry.getValue();
                 //minus one for note with full name
-                int articleCount = client.getNotesByTag(tag, 1000).size()-1;
+                int articleCount = client.getNotesByTag(tag, 1000).size() - 1;
                 t.setArticleCount(articleCount);
                 topics.add(t);
             }
@@ -98,10 +99,20 @@ public class EvernoteStorage extends StorageFacility {
     @Override
     public List<Topic> getResearched() {
         if (topicCache == null) {
-            return loadResearched();
-        } else {
-            return topicCache;
+            loadResearched();
         }
+        return topicCache;
+    }
+
+    @Override
+    public Topic getTopic(String s) {
+        if (topicCache == null)
+            loadResearched();
+        for (Topic t : topicCache) {
+            if (t.getTopic().equals(s))
+                return t;
+        }
+        return null;
     }
 
     @Override
@@ -110,11 +121,11 @@ public class EvernoteStorage extends StorageFacility {
             Tag tag = client.getTag(topic.getTopic());
             if (tag == null) {
                 tag = client.createTag(topic.getTopic());
+                topicCache.add(topic);
             }
-            String contents = formatter.format(article);
+            final String contents = formatter.format(article);
             client.createENMLNote(article.getTitle(), contents,
                     client.getNotebook(RESEARCH_NOTEBOOK), Arrays.asList(tag));
-            topicCache.add(topic);
             return true;
         } catch (Exception e) {
             outQueue.add(
@@ -131,7 +142,7 @@ public class EvernoteStorage extends StorageFacility {
     public boolean saveMultiple(Topic topic, List<Article> articles) {
         // it's just as fast
         for (Article a : articles) {
-            if(!save(topic, a))
+            if (!save(topic, a))
                 return false;
         }
         return true;
@@ -140,7 +151,8 @@ public class EvernoteStorage extends StorageFacility {
     @Override
     public boolean delete(Topic topic) {
         try {
-            Tag tag = client.getTag(topic.getTopic());
+            //cached in the client
+            final Tag tag = client.getTag(topic.getTopic());
             if (tag != null) {
                 // conveniently done for us
                 client.deleteTag(tag);
@@ -148,7 +160,7 @@ public class EvernoteStorage extends StorageFacility {
             topicCache.remove(topic);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
         }
         return false;
     }

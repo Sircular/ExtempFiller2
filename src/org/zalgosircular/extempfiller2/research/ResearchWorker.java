@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research;
 
+import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.messaging.SavedMessage;
@@ -70,49 +71,71 @@ public class ResearchWorker implements Runnable {
                     case RESEARCH:
                         final String topicStr = (String) msg.getData();
                         final Topic addTopic = new Topic(topicStr);
-                        // check to see if it's already been done.
-                        if (!storage.exists(topicStr)) {
-                            // check to see if it's been queued for deletion
-                            boolean deleted = false;
-                            Iterator<InMessage> mIt = inQueue.iterator();
-                            while (mIt.hasNext() && !deleted) {
-                                InMessage delMsg = mIt.next();
-                                if (delMsg.getMessageType() == InMessage.Type.DELETE &&
-                                        ((Topic)delMsg.getData()).equals(addTopic)) {
-                                    deleted = true;
-                                    mIt.remove();
-                                }
+                        // check to see if it's been queued for deletion
+                        boolean deleted = false;
+                        final Iterator<InMessage> mIt = inQueue.iterator();
+                        while (mIt.hasNext() && !deleted) {
+                            final InMessage delMsg = mIt.next();
+                            if (delMsg.getMessageType() == InMessage.Type.DELETE &&
+                                    ((Topic) delMsg.getData()).equals(addTopic)) {
+                                deleted = true;
+                                mIt.remove();
                             }
-                            if (!deleted) {
-                                outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
-                                final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
-                                if (articles.size() > 0) {
-                                    outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
-                                    int articleCount = 0;
-                                    for (Article article : articles) {
-                                        if (storage.save(addTopic, article)) {
-                                            outQueue.add(new OutMessage(
-                                                    OutMessage.Type.SAVED,
-                                                    new SavedMessage(article, addTopic)
-                                            ));
-                                            articleCount++;
-                                        }
-                                        // if it doesn't work, the storage has already
-                                        // sent up an error message
-                                    }
-                                    addTopic.setArticleCount(articleCount);
-                                    outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
-                                }
-                            }
-                        } else {
-                            outQueue.add(new OutMessage(OutMessage.Type.ALREADY_RESEARCHED, addTopic));
                         }
+                        if (deleted) {
+                            outQueue.add(new OutMessage(OutMessage.Type.DELETED, addTopic));
+                            break;
+                        }
+
+                        // check to see if it's already been done.
+                        if (storage.exists(topicStr)) {
+                            outQueue.add(new OutMessage(OutMessage.Type.ALREADY_RESEARCHED, addTopic));
+                            break;
+                        }
+
+                        outQueue.add(new OutMessage(OutMessage.Type.SEARCHING, addTopic));
+                        final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
+                        if (articles.size() > 0) {
+                            outQueue.add(new OutMessage(OutMessage.Type.SAVING, addTopic));
+                            int articleCount = 0;
+                            for (Article article : articles) {
+                                if (storage.save(addTopic, article)) {
+                                    outQueue.add(new OutMessage(
+                                            OutMessage.Type.SAVED,
+                                            new SavedMessage(article, addTopic)
+                                    ));
+                                    articleCount++;
+                                }
+                                // if it doesn't work, the storage has already
+                                // sent up an error message
+                            }
+                            addTopic.setArticleCount(articleCount);
+                        }
+                        outQueue.add(new OutMessage(OutMessage.Type.DONE, addTopic));
                         break;
                     case DELETE:
-                        final Topic delTopic = (Topic) msg.getData();
-                        outQueue.add(new OutMessage(OutMessage.Type.DELETING, delTopic));
-                        storage.delete(delTopic);
-                        outQueue.add(new OutMessage(OutMessage.Type.DELETED, delTopic));
+                        final String delString = (String) msg.getData();
+                        final Topic delTopic = storage.getTopic(delString);
+                        if (delTopic != null) {
+                            outQueue.add(new OutMessage(OutMessage.Type.DELETING, delTopic));
+                            if (storage.delete(delTopic))
+                                outQueue.add(new OutMessage(OutMessage.Type.DELETED, delTopic));
+                        } else {
+                            final RuntimeException e = new RuntimeException("Delete failed: Topic does not exist.");
+                            final Topic erredTopic = new Topic(delString);
+                            erredTopic.setArticleCount(-1);
+                            outQueue.add(
+                                    new OutMessage(
+                                            OutMessage.Type.ERROR,
+                                            new ErrorMessage(
+                                                    erredTopic,
+                                                    e
+                                            )
+                                    )
+                            );
+                        }
+                        //kept as if else for branch prediction optimization
+                        break;
                 }
             } catch (InterruptedException e) {
                 outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Queue interrupted."));

@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research.storage;
 
+import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
@@ -30,19 +31,16 @@ public class LocalTextStorage extends StorageFacility {
 
     @Override
     public boolean open() {
-        if (!Files.exists(Paths.get(DIR))) {
-            try {
+        try {
+            if (!Files.exists(Paths.get(DIR))) {
                 Files.createDirectory(Paths.get(DIR));
-            } catch (IOException e) {
-                return false;
             }
-        }
-        if (!Files.exists(Paths.get(TOPICS_FILE))) {
-            try {
+            if (!Files.exists(Paths.get(TOPICS_FILE))) {
                 Files.createFile(Paths.get(TOPICS_FILE));
-            } catch (IOException e) {
-                return false;
             }
+        } catch (IOException e) {
+            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            return false;
         }
         return true;
     }
@@ -64,6 +62,7 @@ public class LocalTextStorage extends StorageFacility {
             Files.write(Paths.get(TOPICS_FILE), cache.getBytes("utf-8"),
                     StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
+            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
             return false;
         }
         return true;
@@ -91,6 +90,7 @@ public class LocalTextStorage extends StorageFacility {
             Scanner sc = new Scanner(Paths.get(TOPICS_FILE));
             String line;
             topics.clear();
+            shortened.clear();
             while (sc.hasNextLine()) {
                 line = sc.nextLine();
                 final String[] tokens = line.trim().split(Pattern.quote(SEP));
@@ -104,18 +104,29 @@ public class LocalTextStorage extends StorageFacility {
                 shortened.put(t, folderName);
             }
         } catch (IOException e) {
+            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
             return null;
         }
         loaded = true;
         return topics;
     }
 
+    @Override
     public List<Topic> getResearched() {
-        if (topics == null) {
-            return loadResearched();
-        } else {
-            return topics; // maybe this should be cloned?
+        if (topics.size() == 0)
+            loadResearched();
+        return topics; // maybe this should be cloned?
+    }
+
+    @Override
+    public Topic getTopic(String s) {
+        if (topics.size() == 0)
+            loadResearched();
+        for (Topic t : topics) {
+            if (t.getTopic().equals(s))
+                return t;
         }
+        return null;
     }
 
     @Override
@@ -147,6 +158,7 @@ public class LocalTextStorage extends StorageFacility {
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
+            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
         }
         //update topic
@@ -179,6 +191,7 @@ public class LocalTextStorage extends StorageFacility {
             }
             Files.delete(Paths.get(folderName));
         } catch (IOException e) {
+            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
         }
         return true;

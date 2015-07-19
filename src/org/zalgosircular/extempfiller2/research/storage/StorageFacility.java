@@ -31,6 +31,8 @@ public abstract class StorageFacility {
 
     public abstract List<Topic> getResearched(); // this one (should) load from cache
 
+    public abstract Topic getTopic(String topic);
+
     public abstract boolean save(Topic topic, Article article);
 
     public abstract boolean saveMultiple(Topic topic, List<Article> articles);

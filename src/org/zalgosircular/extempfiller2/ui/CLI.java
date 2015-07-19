@@ -132,7 +132,7 @@ public class CLI {
                 final Path filePath = Paths.get(pathStr);
                 if (Files.exists(filePath)) {
                     try {
-                        List<String> lines = Files.readAllLines(filePath);
+                        final List<String> lines = Files.readAllLines(filePath);
                         for (String line : lines) {
                             inQueue.add(new InMessage(InMessage.Type.RESEARCH, line));
                         }
@@ -156,7 +156,7 @@ public class CLI {
                     sb.append(' ');
                     sb.append(words[i]);
                 }
-                inQueue.add(new InMessage(InMessage.Type.DELETE, new Topic(sb.toString())));
+                inQueue.add(new InMessage(InMessage.Type.DELETE, sb.toString()));
             } else {
                 System.err.println("Syntax: delete <topic>");
             }
@@ -212,7 +212,8 @@ public class CLI {
                         case ERROR:
                             final ErrorMessage e = (ErrorMessage) msg.getData();
                             System.err.println("[ERROR] Exception while researching " + e.getTopic().toString());
-                            e.getException().printStackTrace();
+                            if (e.getException() != null)
+                                e.getException().printStackTrace();
                             break;
                         case LOADING:
                             System.out.println("Loading saved topics...");
@@ -222,7 +223,7 @@ public class CLI {
                             break;
                         case RETRIEVED:
                             System.out.println("Currently researched topics:");
-                            List<Topic> topics = (List<Topic>)msg.getData();
+                            final List<Topic> topics = (List<Topic>) msg.getData();
                             for (Topic t : topics) {
                                 System.out.println(String.format(
                                         "[%2d] %s", t.getArticleCount(), t.getTopic()
