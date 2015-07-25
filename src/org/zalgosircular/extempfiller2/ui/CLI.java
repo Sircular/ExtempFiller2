@@ -1,254 +1,42 @@
 package org.zalgosircular.extempfiller2.ui;
 
-import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
-import org.zalgosircular.extempfiller2.messaging.SavedMessage;
-import org.zalgosircular.extempfiller2.research.Topic;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Walt on 7/10/2015.
  */
 public class CLI {
-    private final Thread output;
-    private final Thread input;
+    private final Thread outputThread;
+    private final Thread inputThread;
     private final BlockingQueue<InMessage> inQueue;
     private final BlockingQueue<OutMessage> outQueue;
 
     public CLI(BlockingQueue<InMessage> inQueue, BlockingQueue<OutMessage> outQueue) {
-        this.output = new Thread(new OutputRunnable(outQueue));
-        this.input = new Thread(new InputRunnable(inQueue));
+        final InputRunnable inputRunnable = new InputRunnable(inQueue, System.in);
+        final OutputRunnable outputRunnable = new OutputRunnable(outQueue, System.out, System.err);
+        this.inputThread = new Thread(inputRunnable);
+        this.outputThread = new Thread(outputRunnable);
         this.outQueue = outQueue;
         this.inQueue = inQueue;
     }
 
-    public void run() {
+    public void start() {
         inQueue.add(new InMessage(InMessage.Type.OPEN, null));
         inQueue.add(new InMessage(InMessage.Type.LOAD, null));
-        output.start();
-        input.start();
+        outputThread.start();
+        inputThread.start();
+    }
+
+    public boolean isRunning() {
+        return inputThread.isAlive() || outputThread.isAlive();
     }
 
     public void close() {
-        input.interrupt();
-        output.interrupt();
+        inputThread.interrupt();
+        outputThread.interrupt();
     }
 
-    private class InputRunnable implements Runnable {
-        private final BlockingQueue<InMessage> inQueue;
-        private boolean running;
-
-        public InputRunnable(BlockingQueue<InMessage> inQueue) {
-            this.inQueue = inQueue;
-            this.running = false;
-        }
-
-        public void run() {
-            // this is some somewhat complex code, but it just
-            // makes it possible to interrupt
-            final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(System.in)
-            );
-            running = true;
-            while (running && !Thread.interrupted()) {
-                try {
-                    final String[] words = getInput(reader);
-                    if (words.length > 0) {
-                        final String command = words[0].toLowerCase();
-
-                        if (command.equals("research")) {
-                            research(words);
-                        } else if (command.equals("researchfile")) {
-                            researchFile(words);
-                        } else if (command.equals("delete")) {
-                            delete(words);
-                        } else if (command.equals("view")) {
-                            inQueue.put(new InMessage(InMessage.Type.GET, null));
-                        } else if (command.equals("exit") ||
-                                command.equals("quit") ||
-                                command.equals("close")) {
-                            inQueue.put(new InMessage(InMessage.Type.CLOSE, null));
-                            running = false;
-                        } else {
-                            //Little bit of output code....
-                            System.out.println("Commands: research [topic], researchFile [file], delete [topic], view, exit, help");
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    // this is expected; just end execution
-                    running = false;
-                } catch (IOException e) {
-                    // this is not expected
-                    e.printStackTrace();
-                }
-            }
-            try {
-                reader.close();
-            } catch (IOException e) {
-                //should never happen
-                e.printStackTrace();
-            }
-        }
-
-        private String[] getInput(BufferedReader reader) throws IOException, InterruptedException {
-            while (!reader.ready()) {
-                Thread.sleep(50);
-            }
-            String input = reader.readLine();
-            // split on one or more spaces
-            return input.split("\\s+");
-        }
-
-        private void research(String[] words) throws InterruptedException {
-            if (words.length > 1) {
-                final StringBuilder sb = new StringBuilder(words[1]);
-                for (int i = 2; i < words.length; i++) {
-                    sb.append(' ');
-                    sb.append(words[i]);
-                }
-                inQueue.put(new InMessage(InMessage.Type.RESEARCH, sb.toString()));
-            } else {
-                System.err.println("Syntax: research <topic>");
-            }
-        }
-
-        private void researchFile(String[] words) throws InterruptedException {
-            if (words.length > 1) {
-                final StringBuilder sb = new StringBuilder(words[1]);
-                for (int i = 2; i < words.length; i++) {
-                    sb.append(' ');
-                    sb.append(words[i]);
-                }
-                final String pathStr = sb.toString();
-                final Path filePath = Paths.get(pathStr);
-                if (Files.exists(filePath)) {
-                    try {
-                        final List<String> lines = Files.readAllLines(filePath);
-                        for (String line : lines) {
-                            inQueue.put(new InMessage(InMessage.Type.RESEARCH, line));
-                        }
-                        System.out.println(String.format("Queued %d topics for research.", lines.size()));
-                    } catch (IOException e){
-                        System.err.println("Could not read from file: "+pathStr);
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.err.println("No such file: "+pathStr);
-                }
-            } else {
-                System.err.println("Syntax: researchFile <file>");
-            }
-        }
-
-        private void delete(String[] words) throws InterruptedException {
-            if (words.length > 1) {
-                final StringBuilder sb = new StringBuilder(words[1]);
-                for (int i = 2; i < words.length; i++) {
-                    sb.append(' ');
-                    sb.append(words[i]);
-                }
-                inQueue.put(new InMessage(InMessage.Type.DELETE, sb.toString()));
-            } else {
-                System.err.println("Syntax: delete <topic>");
-            }
-        }
-    }
-
-    private class OutputRunnable implements Runnable {
-        private final BlockingQueue<OutMessage> outQueue;
-        private boolean running;
-
-        public OutputRunnable(BlockingQueue<OutMessage> outQueue) {
-            this.outQueue = outQueue;
-            this.running = false;
-        }
-
-        public void run() {
-            System.out.println("Starting program.");
-            running = true;
-            while (running && !Thread.interrupted()) {
-                try {
-                    OutMessage msg = outQueue.take();
-                    // switches are weird
-                    String msgStr;
-                    Topic topic;
-                    switch (msg.getMessageType()) {
-                        case DEBUG:
-                            msgStr = (String) msg.getData();
-                            System.out.println("[DEBUG] " + msgStr);
-                            break;
-                        case SEARCHING:
-                            topic = (Topic) msg.getData();
-                            System.out.println("Now researching topic: " + topic.getTopic());
-                            break;
-                        case SAVING:
-                            topic = (Topic) msg.getData();
-                            System.out.println("Now saving articles for topic: " + topic.getTopic());
-                            break;
-                        case SAVED:
-                            final SavedMessage savedMessage = (SavedMessage) msg.getData();
-                            System.out.println(
-                                    "Saved " + savedMessage.getArticle().getTitle()
-                                            + " under topic: " + savedMessage.getTopic().getTopic());
-                            break;
-                        case DONE:
-                            topic = (Topic) msg.getData();
-                            System.out.println(String.format("Found total of %d articles for topic: %s",
-                                    topic.getArticleCount(), topic.getTopic()));
-                            break;
-                        case ALREADY_RESEARCHED:
-                            topic = (Topic)msg.getData();
-                            System.out.println("Already researched topic: " + topic.getTopic());
-                            break;
-                        case ERROR:
-                            final ErrorMessage e = (ErrorMessage) msg.getData();
-                            System.err.println("[ERROR] Exception while researching " + e.getTopic().toString());
-                            if (e.getException() != null)
-                                e.getException().printStackTrace();
-                            break;
-                        case LOADING:
-                            System.out.println("Loading saved topics...");
-                            break;
-                        case LOADED:
-                            System.out.println("Loaded topics.");
-                            break;
-                        case RETRIEVED:
-                            System.out.println("Currently researched topics:");
-                            final List<Topic> topics = (List<Topic>) msg.getData();
-                            for (Topic t : topics) {
-                                System.out.println(String.format(
-                                        "[%2d] %s", t.getArticleCount(), t.getTopic()
-                                ));
-                            }
-                            break;
-                        case CLOSED:
-                            System.out.println("Researcher closed.");
-                            running = false;
-                            break;
-                        case DELETING:
-                            topic = (Topic) msg.getData();
-                            System.out.println("Now deleting topic: " + topic.getTopic());
-                            break;
-                        case DELETED:
-                            topic = (Topic) msg.getData();
-                            System.out.println("Successfully deleted topic: " + topic.getTopic());
-                            break;
-                    }
-                } catch (InterruptedException e) {
-                    System.err.println("[ERROR] Message queue interrupted");
-                    running = false;
-                }
-            }
-            System.out.println("Exiting program.");
-        }
-    }
 }

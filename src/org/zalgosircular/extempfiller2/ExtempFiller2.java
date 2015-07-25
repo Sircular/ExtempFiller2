@@ -29,6 +29,6 @@ public class ExtempFiller2 {
 
         // initialize the UI
         CLI cli = new CLI(inQueue, outQueue);
-        cli.run();
+        cli.start();
     }
 }

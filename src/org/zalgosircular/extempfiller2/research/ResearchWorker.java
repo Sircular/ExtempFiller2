@@ -43,8 +43,7 @@ public class ResearchWorker implements Runnable {
     }
 
     public void run() {
-        boolean running = true;
-        while (running) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 final InMessage msg = inQueue.take();
                 switch (msg.getMessageType()) {
@@ -53,8 +52,7 @@ public class ResearchWorker implements Runnable {
                         break;
                     case CLOSE:
                         storage.close();
-                        running = false;
-                        break;
+                        throw new InterruptedException();
                     case LOAD:
                         outQueue.put(new OutMessage(OutMessage.Type.LOADING, null));
                         final List<Topic> topics = storage.loadResearched();
@@ -135,7 +133,7 @@ public class ResearchWorker implements Runnable {
                 }
             } catch (InterruptedException e) {
                 outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Queue interrupted."));
-                running = false;
+                Thread.currentThread().interrupt();
             }
         }
         outQueue.add(new OutMessage(OutMessage.Type.CLOSED, null));
