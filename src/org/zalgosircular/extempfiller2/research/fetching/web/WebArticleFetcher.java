@@ -16,7 +16,7 @@ import org.zalgosircular.extempfiller2.research.fetching.web.urls.URLFetcher;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Logan Lembke on 7/12/2015.
@@ -26,7 +26,7 @@ public class WebArticleFetcher extends ArticleFetcher {
     private final HTMLFetcher htmlFetcher;
     private final ArticleParser articleParser;
 
-    public WebArticleFetcher(Queue<OutMessage> outQueue, SEARCH_ENGINE searchEngine/*, boolean readability*/) {
+    public WebArticleFetcher(BlockingQueue<OutMessage> outQueue, SEARCH_ENGINE searchEngine/*, boolean readability*/) {
         super(outQueue);
         this.searchEngine = searchEngine;
         //if (readability) {
@@ -41,7 +41,7 @@ public class WebArticleFetcher extends ArticleFetcher {
         }*/
     }
 
-    public List<Article> fetchArticles(Topic topic, int maxResults, List<String> excludes) {
+    public List<Article> fetchArticles(Topic topic, int maxResults, List<String> excludes) throws InterruptedException {
         final List<Article> articles = new ArrayList<Article>(maxResults);
         final URLFetcher urlFetcher = new SearchEngineFetcher(outQueue, searchEngine, topic, excludes);
         int articlesFound = 0;
@@ -57,7 +57,7 @@ public class WebArticleFetcher extends ArticleFetcher {
             }
         }
         if (articles.size() == 0)
-            outQueue.add(
+            outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
                             new ErrorMessage(
