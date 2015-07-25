@@ -12,6 +12,7 @@ import org.zalgosircular.extempfiller2.research.formatting.ENMLFormatter;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
 
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Logan Lembke on 7/8/2015.
@@ -21,12 +22,12 @@ public class EvernoteStorage extends StorageFacility {
     private static final String RESEARCH_NOTEBOOK = "Web Notes";
     private List<Topic> topicCache = null;
 
-    public EvernoteStorage(Queue<OutMessage> outQueue, ENMLFormatter formatter) {
+    public EvernoteStorage(BlockingQueue<OutMessage> outQueue, ENMLFormatter formatter) {
         super(outQueue, formatter);
     }
 
     @Override
-    public boolean open() {
+    public boolean open() throws InterruptedException {
         // because of the constructor, it's already open
         try {
             client = new EvernoteClient(EvernoteService.SANDBOX, KeyManager.getKey("evernote")); // sandbox for now
@@ -35,7 +36,7 @@ public class EvernoteStorage extends StorageFacility {
                 client.createNotebook(RESEARCH_NOTEBOOK);
             }
         } catch (Exception e) { // we'll have to fix this
-            outQueue.add(
+            outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
                             new ErrorMessage(null, e)
@@ -52,14 +53,14 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public boolean exists(String topic) {
+    public boolean exists(String topic) throws InterruptedException {
         try {
             //Cached in the client
             return client.getTag(topic) != null;
         } catch (Exception e) {
             final Topic erredTopic = new Topic(topic);
             erredTopic.setArticleCount(-1);
-            outQueue.add(
+            outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
                             new ErrorMessage(erredTopic, e)
@@ -70,7 +71,7 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public List<Topic> loadResearched() {
+    public List<Topic> loadResearched() throws InterruptedException {
         try {
             final Collection<Map.Entry<String, Tag>> names = client.getFullyNamedTags();
             final List<Topic> topics = new LinkedList<Topic>();
@@ -86,7 +87,7 @@ public class EvernoteStorage extends StorageFacility {
             topicCache = topics;
             return topics;
         } catch (Exception e) {
-            outQueue.add(
+            outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
                             new ErrorMessage(null, e)
@@ -97,7 +98,7 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public List<Topic> getResearched() {
+    public List<Topic> getResearched() throws InterruptedException {
         if (topicCache == null) {
             loadResearched();
         }
@@ -105,7 +106,7 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public Topic getTopic(String s) {
+    public Topic getTopic(String s) throws InterruptedException {
         if (topicCache == null)
             loadResearched();
         for (Topic t : topicCache) {
@@ -116,7 +117,7 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public boolean save(Topic topic, Article article) {
+    public boolean save(Topic topic, Article article) throws InterruptedException {
         try {
             Tag tag = client.getTag(topic.getTopic());
             if (tag == null) {
@@ -128,7 +129,7 @@ public class EvernoteStorage extends StorageFacility {
                     client.getNotebook(RESEARCH_NOTEBOOK), Arrays.asList(tag));
             return true;
         } catch (Exception e) {
-            outQueue.add(
+            outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
                             new ErrorMessage(topic, e)
@@ -139,7 +140,7 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public boolean saveMultiple(Topic topic, List<Article> articles) {
+    public boolean saveMultiple(Topic topic, List<Article> articles) throws InterruptedException {
         // it's just as fast
         for (Article a : articles) {
             if (!save(topic, a))
@@ -149,7 +150,7 @@ public class EvernoteStorage extends StorageFacility {
     }
 
     @Override
-    public boolean delete(Topic topic) {
+    public boolean delete(Topic topic) throws InterruptedException {
         try {
             //cached in the client
             final Tag tag = client.getTag(topic.getTopic());
@@ -160,7 +161,7 @@ public class EvernoteStorage extends StorageFacility {
             topicCache.remove(topic);
             return true;
         } catch (Exception e) {
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
         }
         return false;
     }

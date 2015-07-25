@@ -32,10 +32,10 @@ public class CLI {
     }
 
     public void run() {
-        output.start();
-        input.start();
         inQueue.add(new InMessage(InMessage.Type.OPEN, null));
         inQueue.add(new InMessage(InMessage.Type.LOAD, null));
+        output.start();
+        input.start();
     }
 
     public void close() {
@@ -72,11 +72,11 @@ public class CLI {
                         } else if (command.equals("delete")) {
                             delete(words);
                         } else if (command.equals("view")) {
-                            inQueue.add(new InMessage(InMessage.Type.GET, null));
+                            inQueue.put(new InMessage(InMessage.Type.GET, null));
                         } else if (command.equals("exit") ||
                                 command.equals("quit") ||
                                 command.equals("close")) {
-                            inQueue.add(new InMessage(InMessage.Type.CLOSE, null));
+                            inQueue.put(new InMessage(InMessage.Type.CLOSE, null));
                             running = false;
                         } else {
                             //Little bit of output code....
@@ -108,20 +108,20 @@ public class CLI {
             return input.split("\\s+");
         }
 
-        private void research(String[] words) {
+        private void research(String[] words) throws InterruptedException {
             if (words.length > 1) {
                 final StringBuilder sb = new StringBuilder(words[1]);
                 for (int i = 2; i < words.length; i++) {
                     sb.append(' ');
                     sb.append(words[i]);
                 }
-                inQueue.add(new InMessage(InMessage.Type.RESEARCH, sb.toString()));
+                inQueue.put(new InMessage(InMessage.Type.RESEARCH, sb.toString()));
             } else {
                 System.err.println("Syntax: research <topic>");
             }
         }
 
-        private void researchFile(String[] words) {
+        private void researchFile(String[] words) throws InterruptedException {
             if (words.length > 1) {
                 final StringBuilder sb = new StringBuilder(words[1]);
                 for (int i = 2; i < words.length; i++) {
@@ -134,7 +134,7 @@ public class CLI {
                     try {
                         final List<String> lines = Files.readAllLines(filePath);
                         for (String line : lines) {
-                            inQueue.add(new InMessage(InMessage.Type.RESEARCH, line));
+                            inQueue.put(new InMessage(InMessage.Type.RESEARCH, line));
                         }
                         System.out.println(String.format("Queued %d topics for research.", lines.size()));
                     } catch (IOException e){
@@ -149,14 +149,14 @@ public class CLI {
             }
         }
 
-        private void delete(String[] words) {
+        private void delete(String[] words) throws InterruptedException {
             if (words.length > 1) {
                 final StringBuilder sb = new StringBuilder(words[1]);
                 for (int i = 2; i < words.length; i++) {
                     sb.append(' ');
                     sb.append(words[i]);
                 }
-                inQueue.add(new InMessage(InMessage.Type.DELETE, sb.toString()));
+                inQueue.put(new InMessage(InMessage.Type.DELETE, sb.toString()));
             } else {
                 System.err.println("Syntax: delete <topic>");
             }

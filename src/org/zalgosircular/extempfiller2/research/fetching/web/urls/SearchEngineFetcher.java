@@ -16,6 +16,7 @@ import java.net.URLEncoder;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Logan Lembke on 7/12/2015.
@@ -29,7 +30,7 @@ public class SearchEngineFetcher extends URLFetcher {
     private boolean done;
     private boolean opened;
 
-    public SearchEngineFetcher(Queue<OutMessage> outQueue, SEARCH_ENGINE searchEngine, Topic topic, List<String> excludes) {
+    public SearchEngineFetcher(BlockingQueue<OutMessage> outQueue, SEARCH_ENGINE searchEngine, Topic topic, List<String> excludes) {
         super(outQueue, topic, excludes);
         this.searchEngine = searchEngine;
         this.urls = new LinkedList<URI>();
@@ -39,37 +40,33 @@ public class SearchEngineFetcher extends URLFetcher {
     }
 
     @Override
-    public URI getNext() {
+    public URI getNext() throws InterruptedException {
         if (urls.size() == 0)
             fetchMore();
         return urls.poll();
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean hasNext() throws InterruptedException {
         if (!opened) {
             fetchMore();
         }
         return !done || urls.size() != 0;
     }
 
-    public void fetchMore() {
+    public void fetchMore() throws InterruptedException {
         try {
-            // convert the topic to a duckduckgo search query
             final String queryURL = String.format(searchEngine.QUERY_STRING,
                     URLEncoder.encode(topic.getTopic(), "UTF-8"), results);
             final Document contentsDoc = Jsoup.connect(queryURL).userAgent(USER_AGENT).timeout(TIMEOUT).get();
-            // duckduckgo is better about this than google
-            // this selects the a tag from a particular place in the webpage
-            // DDG has a div with just the results, and div.links_main.links_deep is each
-            // individual result
+
             final Elements searchResults = contentsDoc.select(searchEngine.RESULT_SELECTOR);
             // get their target urls
             String urlTarget;
             outer:
             for (Element el : searchResults) {
                 // JSOUP HANDLES REDIRECTS
-                urlTarget = el.attr("href").toLowerCase();
+                urlTarget = el.attr("abs:href").toLowerCase();
                 if (excludes != null) {
                     for (String exclude : excludes) {
                         if (urlTarget.contains(exclude.toLowerCase())) {
@@ -94,7 +91,7 @@ public class SearchEngineFetcher extends URLFetcher {
             e.printStackTrace();
         } catch (IOException e) {
             final ErrorMessage err = new ErrorMessage(topic, e);
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, err));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, err));
         }
     }
 

@@ -9,20 +9,20 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Walt on 7/9/2015.
  */
 public class HTMLFetcher {
-    protected final Queue<OutMessage> outQueue;
+    protected final BlockingQueue<OutMessage> outQueue;
     private static final int TIMEOUT = 10 * 1000;
 
-    public HTMLFetcher(Queue<OutMessage> outQueue) {
+    public HTMLFetcher(BlockingQueue<OutMessage> outQueue) {
         this.outQueue = outQueue;
     }
 
-    public String getResponse(URI location, Topic topic) {
+    public String getResponse(URI location, Topic topic) throws InterruptedException {
         try {
             return Jsoup.connect(location.toString()).timeout(TIMEOUT).get().html();
         } catch (MalformedURLException e) {
@@ -34,7 +34,7 @@ public class HTMLFetcher {
         } catch (IOException e) {
             // this will happen quite a bit
             final ErrorMessage err = new ErrorMessage(topic, e);
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, err));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, err));
         }
         return null;
     }

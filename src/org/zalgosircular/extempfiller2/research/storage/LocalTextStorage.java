@@ -9,7 +9,11 @@ import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 import java.util.regex.Pattern;
 
 /**
@@ -23,14 +27,14 @@ public class LocalTextStorage extends StorageFacility {
     private final HashMap<Topic, String> shortened;
     private boolean loaded = false;
 
-    public LocalTextStorage(Queue<OutMessage> outQueue, ArticleFormatter formatter) {
+    public LocalTextStorage(BlockingQueue<OutMessage> outQueue, ArticleFormatter formatter) {
         super(outQueue, formatter);
         this.topics = new LinkedList<Topic>();
         this.shortened = new HashMap<Topic, String>();
     }
 
     @Override
-    public boolean open() {
+    public boolean open() throws InterruptedException {
         try {
             if (!Files.exists(Paths.get(DIR))) {
                 Files.createDirectory(Paths.get(DIR));
@@ -39,14 +43,14 @@ public class LocalTextStorage extends StorageFacility {
                 Files.createFile(Paths.get(TOPICS_FILE));
             }
         } catch (IOException e) {
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
             return false;
         }
         return true;
     }
 
     @Override
-    public boolean close() {
+    public boolean close() throws InterruptedException {
         final StringBuilder sb = new StringBuilder();
         final String endl = System.getProperty("line.separator");
         for (Topic t : topics) {
@@ -62,7 +66,7 @@ public class LocalTextStorage extends StorageFacility {
             Files.write(Paths.get(TOPICS_FILE), cache.getBytes("utf-8"),
                     StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
             return false;
         }
         return true;
@@ -85,7 +89,7 @@ public class LocalTextStorage extends StorageFacility {
 
     //loads cache
     @Override
-    public List<Topic> loadResearched() {
+    public List<Topic> loadResearched() throws InterruptedException {
         try {
             Scanner sc = new Scanner(Paths.get(TOPICS_FILE));
             String line;
@@ -104,7 +108,7 @@ public class LocalTextStorage extends StorageFacility {
                 shortened.put(t, folderName);
             }
         } catch (IOException e) {
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
             return null;
         }
         loaded = true;
@@ -112,14 +116,14 @@ public class LocalTextStorage extends StorageFacility {
     }
 
     @Override
-    public List<Topic> getResearched() {
+    public List<Topic> getResearched() throws InterruptedException {
         if (topics.size() == 0)
             loadResearched();
         return topics; // maybe this should be cloned?
     }
 
     @Override
-    public Topic getTopic(String s) {
+    public Topic getTopic(String s) throws InterruptedException {
         if (topics.size() == 0)
             loadResearched();
         for (Topic t : topics) {
@@ -130,7 +134,7 @@ public class LocalTextStorage extends StorageFacility {
     }
 
     @Override
-    public boolean save(Topic topic, Article article) {
+    public boolean save(Topic topic, Article article) throws InterruptedException {
         try {
             String safeFolderName;
             //New topic
@@ -158,7 +162,7 @@ public class LocalTextStorage extends StorageFacility {
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
         }
         //update topic
@@ -167,7 +171,7 @@ public class LocalTextStorage extends StorageFacility {
     }
 
     @Override
-    public boolean saveMultiple(Topic topic, List<Article> articles) {
+    public boolean saveMultiple(Topic topic, List<Article> articles) throws InterruptedException {
         boolean result;
         for (Article a : articles) {
             result = save(topic, a);
@@ -178,7 +182,7 @@ public class LocalTextStorage extends StorageFacility {
     }
 
     @Override
-    public boolean delete(Topic topic) {
+    public boolean delete(Topic topic) throws InterruptedException {
         final String folderName = DIR + File.separator + shortened.get(topic);
         //update cache
         topics.remove(topic);
@@ -191,7 +195,7 @@ public class LocalTextStorage extends StorageFacility {
             }
             Files.delete(Paths.get(folderName));
         } catch (IOException e) {
-            outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
         }
         return true;
