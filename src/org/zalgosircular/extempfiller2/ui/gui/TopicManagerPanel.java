@@ -72,6 +72,21 @@ public class TopicManagerPanel extends JPanel {
         }
     }
 
+    public void addTopic(Topic topic) {
+        DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
+        // check to see if it's already in the list
+        // might as well not add something that's already researched.
+        boolean found = false;
+        for (int i = 0; i < model.size() && !found; i++) {
+            if (model.get(i).getTopic().equals(topic)) {
+                found = true;
+            }
+        }
+        if (!found) {
+            model.addElement(new TopicListItem(topic, TopicState.QUEUED_RESEARCH));
+        }
+    }
+
     public void setTopicState(Topic topic, TopicState state) {
         DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
         boolean found = false;
@@ -101,7 +116,7 @@ public class TopicManagerPanel extends JPanel {
         list.repaint();
     }
 
-    public void setTopics(java.util.List<Topic> topics) {
+    public void setResearchedTopics(java.util.List<Topic> topics) {
         DefaultListModel<TopicListItem> model =
                 (DefaultListModel<TopicListItem>)list.getModel();
         for (Topic topic : topics) {
@@ -241,7 +256,7 @@ public class TopicManagerPanel extends JPanel {
 
     // internal methods used to work with queues and such
     private void enqueueTopic(String topic) {
-        setTopicState(new Topic(topic), TopicState.QUEUED_RESEARCH);
+        addTopic(new Topic(topic));
         inQueue.add(new InMessage(InMessage.Type.RESEARCH, topic));
     }
 }

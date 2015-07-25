@@ -97,7 +97,7 @@ public class GUIWindow extends JFrame {
     }
 
     public void setTopics(java.util.List<Topic> topics) {
-        managerPanel.setTopics(topics);
+        managerPanel.setResearchedTopics(topics);
     }
 
     // helper factory methods
