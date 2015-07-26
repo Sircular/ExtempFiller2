@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -130,6 +131,17 @@ public class TopicManagerPanel extends JPanel {
             model.addElement(item);
         }
         list.revalidate();
+    }
+
+    // used to check for duplicates
+    public java.util.List<String> getTopics() {
+        final java.util.List<String> topics = new LinkedList<String>();
+        final DefaultListModel<TopicListItem> model =
+                (DefaultListModel<TopicListItem>)list.getModel();
+        for (int i = 0; i < model.size(); i++) {
+            topics.add(model.get(i).getTopic().getTopic());
+        }
+        return topics;
     }
 
     public void setEnabled(boolean value) {

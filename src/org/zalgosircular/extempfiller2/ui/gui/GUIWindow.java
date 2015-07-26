@@ -7,11 +7,15 @@ import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel.TopicStat
 import org.zalgosircular.extempfiller2.ui.gui.subwindows.DebugWindow;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -50,6 +54,24 @@ class GUIWindow extends JFrame {
         // set up the menu
         menuBar = new JMenuBar();
         final JMenu fileMenu = new JMenu("File");
+        fileMenu.add(createMenuItem("Load Topics From File", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    loadTopicsFromFile();
+                } catch (IOException e1) {
+                    showError(e1);
+                }
+            }
+        }));
+        fileMenu.add(createMenuItem("Reload Topics", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                inQueue.add(new InMessage(InMessage.Type.LOAD, null));
+                setEnabled(false);
+            }
+        }));
+        fileMenu.addSeparator();
         fileMenu.add(createMenuItem("Close", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -137,5 +159,37 @@ class GUIWindow extends JFrame {
         JMenuItem item = new JMenuItem(name);
         item.addActionListener(listener);
         return item;
+    }
+
+    private void loadTopicsFromFile() throws IOException {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("ExtempFiller2");
+        chooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() ||
+                        f.getName().toLowerCase().endsWith(".txt");
+            }
+
+            @Override
+            public String getDescription() {
+                return "Text Files";
+            }
+        });
+        int response = chooser.showOpenDialog(this);
+        if (response == JFileChooser.APPROVE_OPTION) {
+            // get everything currently researched
+            java.util.List<String> researched = managerPanel.getTopics();
+            // load everything from file
+            File file = chooser.getSelectedFile();
+            Scanner readScanner = new Scanner(file);
+            while (readScanner.hasNext()) {
+                String topic = readScanner.nextLine();
+                if (!researched.contains(topic)) {
+                    managerPanel.addTopic(new Topic(topic));
+                    inQueue.add(new InMessage(InMessage.Type.RESEARCH, topic));
+                }
+            }
+        }
     }
 }
