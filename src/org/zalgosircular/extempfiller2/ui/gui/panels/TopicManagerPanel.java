@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.ui.gui;
+package org.zalgosircular.extempfiller2.ui.gui.panels;
 
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
@@ -6,27 +6,24 @@ import org.zalgosircular.extempfiller2.research.Topic;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Walt on 7/15/2015.
  */
 public class TopicManagerPanel extends JPanel {
-    private final Queue<InMessage> inQueue;
+    private final BlockingQueue<InMessage> inQueue;
     private final JList<TopicListItem> list;
     private final AddTopicPanel addTopicPanel;
 
-    public TopicManagerPanel(Queue<InMessage> inQueue) {
+    public TopicManagerPanel(BlockingQueue<InMessage> inQueue) {
         this.inQueue = inQueue;
 
-        DefaultListModel<TopicListItem> model = new DefaultListModel<TopicListItem>();
-
         // initialize the actual GUI
-        list = new JList<TopicListItem>(model);
+        list = new JList<TopicListItem>(new DefaultListModel<TopicListItem>());
+
         // when you press delete, all selected topics
         // are queued for deletion
         list.addKeyListener(new KeyListener() {
@@ -38,7 +35,11 @@ public class TopicManagerPanel extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_DELETE)
-                    deleteSelectedTopics();
+                    try {
+                        deleteSelectedTopics();
+                    } catch (InterruptedException e1) {
+                        Thread.currentThread().interrupt();
+                    }
             }
 
             @Override
@@ -46,8 +47,9 @@ public class TopicManagerPanel extends JPanel {
 
             }
         });
+
         // we need to encase it in a scrollpane
-        JScrollPane listPane = new JScrollPane(list);
+        final JScrollPane listPane = new JScrollPane(list);
         listPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         listPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
@@ -55,7 +57,7 @@ public class TopicManagerPanel extends JPanel {
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.add(listPane, BorderLayout.CENTER);
 
-        addTopicPanel = new AddTopicPanel();
+        addTopicPanel = new AddTopicPanel(this, inQueue);
         addTopicPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
         this.add(addTopicPanel, BorderLayout.SOUTH);
     }
@@ -63,20 +65,20 @@ public class TopicManagerPanel extends JPanel {
     // methods for working with the list
     // split up into functions so that we aren't
     // writing tons of code when registering handlers
-    private void deleteSelectedTopics() {
+    private void deleteSelectedTopics() throws InterruptedException {
         final int[] selected = list.getSelectedIndices();
-        DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
+        final DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>) list.getModel();
         for (int i : selected) {
             setTopicState(i, TopicState.QUEUED_DELETION);
-            inQueue.add(new InMessage(InMessage.Type.DELETE, model.get(i).getTopic()));
+            inQueue.put(new InMessage(InMessage.Type.DELETE, model.get(i).getTopic().getTopic()));
         }
     }
 
     public void setTopicState(Topic topic, TopicState state) {
-        DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
+        final DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>) list.getModel();
         boolean found = false;
         for (int i = 0; i < model.size() && !found; i++) {
-            TopicListItem item = model.get(i);
+            final TopicListItem item = model.get(i);
             if (item.getTopic().equals(topic)) {
                 setTopicState(i, state);
                 found = true;
@@ -90,7 +92,7 @@ public class TopicManagerPanel extends JPanel {
     }
 
     public void setTopicState(int topic, TopicState state) {
-        DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
+        final DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>) list.getModel();
         if (topic < model.size()) {
             if (state == TopicState.DELETED) {
                 model.remove(topic);
@@ -102,7 +104,7 @@ public class TopicManagerPanel extends JPanel {
     }
 
     public void setTopics(java.util.List<Topic> topics) {
-        DefaultListModel<TopicListItem> model =
+        final DefaultListModel<TopicListItem> model =
                 (DefaultListModel<TopicListItem>)list.getModel();
         for (Topic topic : topics) {
             TopicListItem item = new TopicListItem(topic, TopicState.RESEARCHED);
@@ -114,65 +116,6 @@ public class TopicManagerPanel extends JPanel {
     public void setEnabled(boolean value) {
         list.setEnabled(value);
         addTopicPanel.setEnabled(value);
-    }
-
-    private class AddTopicPanel extends JPanel {
-        private JButton addButton;
-        private JTextField addField;
-        public AddTopicPanel() {
-            addField = new JTextField();
-            addField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-                    addButton.setEnabled(addField.getText().length() > 0);
-                }
-
-                @Override
-                public void keyPressed(KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                        enqueueTypedTopic();
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
-                }
-            });
-
-            addButton = new JButton("Add Topic");
-            addButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    enqueueTypedTopic();
-                }
-            });
-            addButton.setMinimumSize(addButton.getPreferredSize());
-            addButton.setEnabled(false);
-            // TODO: fix the extra gradient fill created by
-            // adding a border
-            addButton.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(0, 10, 0, 0),
-                    addButton.getBorder()));
-
-            addField.setSize(100, addButton.getHeight());
-
-            this.setLayout(new BorderLayout());
-            this.add(addButton, BorderLayout.EAST);
-            this.add(addField, BorderLayout.CENTER);
-        }
-
-        public void setEnabled(boolean value) {
-            addField.setEnabled(value);
-            addButton.setEnabled(value && addField.getText().length() > 0);
-        }
-
-        private void enqueueTypedTopic() {
-            if (addField.getText().length() > 0) {
-                final String topic = addField.getText();
-                addField.setText("");
-                addButton.setEnabled(false);
-                enqueueTopic(topic);
-            }
-        }
     }
 
     private class TopicListItem {
@@ -187,7 +130,7 @@ public class TopicManagerPanel extends JPanel {
         @Override
         public String toString() {
             String stateStr = "";
-            switch (state) {
+            switch (getState()) {
                 case QUEUED_RESEARCH:
                     stateStr = "Queued for Research";
                     break;
@@ -240,8 +183,5 @@ public class TopicManagerPanel extends JPanel {
     }
 
     // internal methods used to work with queues and such
-    private void enqueueTopic(String topic) {
-        setTopicState(new Topic(topic), TopicState.QUEUED_RESEARCH);
-        inQueue.add(new InMessage(InMessage.Type.RESEARCH, topic));
-    }
+
 }

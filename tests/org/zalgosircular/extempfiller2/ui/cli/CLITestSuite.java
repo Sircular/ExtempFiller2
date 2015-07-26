@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.ui;
+package org.zalgosircular.extempfiller2.ui.cli;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

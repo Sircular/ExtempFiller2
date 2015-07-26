@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.ui;
+package org.zalgosircular.extempfiller2.ui.cli;
 
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
@@ -18,7 +18,7 @@ class OutputRunnable implements Runnable {
     private final PrintStream out;
     private final PrintStream err;
 
-    public OutputRunnable(BlockingQueue<OutMessage> outQueue, OutputStream out, OutputStream err) {
+    OutputRunnable(BlockingQueue<OutMessage> outQueue, OutputStream out, OutputStream err) {
         this.outQueue = outQueue;
         this.out = new PrintStream(out);
         this.err = new PrintStream(err);

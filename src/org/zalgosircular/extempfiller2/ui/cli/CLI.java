@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.ui;
+package org.zalgosircular.extempfiller2.ui.cli;
 
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
@@ -18,7 +18,9 @@ public class CLI {
         final InputRunnable inputRunnable = new InputRunnable(inQueue, System.in);
         final OutputRunnable outputRunnable = new OutputRunnable(outQueue, System.out, System.err);
         this.inputThread = new Thread(inputRunnable);
+        this.inputThread.setName("InMessage Loop");
         this.outputThread = new Thread(outputRunnable);
+        this.outputThread.setName("OutMessage Loop");
         this.outQueue = outQueue;
         this.inQueue = inQueue;
     }

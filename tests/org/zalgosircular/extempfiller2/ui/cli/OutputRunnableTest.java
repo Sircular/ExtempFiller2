@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.ui;
+package org.zalgosircular.extempfiller2.ui.cli;
 
 import org.junit.After;
 import org.junit.Before;

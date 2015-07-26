@@ -91,19 +91,18 @@ public class ResearchWorker implements Runnable {
                         final List<Article> articles = fetcher.fetchArticles(addTopic, MAX_ARTICLES, null);
                         if (articles.size() > 0) {
                             outQueue.put(new OutMessage(OutMessage.Type.SAVING, addTopic));
-                            int articleCount = 0;
+
                             for (Article article : articles) {
                                 if (storage.save(addTopic, article)) {
                                     outQueue.put(new OutMessage(
                                             OutMessage.Type.SAVED,
                                             new SavedMessage(article, addTopic)
                                     ));
-                                    articleCount++;
+                                    addTopic.setArticleCount(addTopic.getArticleCount() + 1);
                                 }
                                 // if it doesn't work, the storage has already
                                 // sent up an error message
                             }
-                            addTopic.setArticleCount(articleCount);
                         }
                         outQueue.put(new OutMessage(OutMessage.Type.DONE, addTopic));
                         break;

@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.ui;
+package org.zalgosircular.extempfiller2.ui.cli;
 
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 
@@ -19,7 +19,7 @@ class InputRunnable implements Runnable {
     private final BlockingQueue<InMessage> inQueue;
     private final InputStream inputStream;
 
-    public InputRunnable(BlockingQueue<InMessage> inQueue, InputStream inputStream) {
+    InputRunnable(BlockingQueue<InMessage> inQueue, InputStream inputStream) {
         this.inQueue = inQueue;
         this.inputStream = inputStream;
     }

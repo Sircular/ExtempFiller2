@@ -2,7 +2,9 @@ package org.zalgosircular.extempfiller2.ui.gui;
 
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
-import org.zalgosircular.extempfiller2.ui.gui.TopicManagerPanel.TopicState;
+import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel;
+import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel.TopicState;
+import org.zalgosircular.extempfiller2.ui.gui.subwindows.DebugWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,20 +12,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Walt on 7/15/2015.
  */
-public class GUIWindow extends JFrame {
+class GUIWindow extends JFrame {
 
     private DebugWindow debugWindow;
-    private Queue<InMessage> inQueue;
+    private BlockingQueue<InMessage> inQueue;
     private TopicManagerPanel managerPanel;
 
     private JMenuBar menuBar;
 
-    public GUIWindow(Queue<InMessage> inQueue) {
+    GUIWindow(BlockingQueue<InMessage> inQueue) {
         this.inQueue = inQueue;
         this.debugWindow = new DebugWindow();
     }
@@ -31,26 +33,35 @@ public class GUIWindow extends JFrame {
     public void init() {
         this.setTitle("ExtempFiller2");
         this.setPreferredSize(new Dimension(640, 400));
-        this.pack();
-        // add a handler
+
+        // add a handler for closing
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                close();
+                try {
+                    close();
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
             }
         });
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
         // set up the menu
         menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("File");
+        final JMenu fileMenu = new JMenu("File");
         fileMenu.add(createMenuItem("Close", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                close();
+                try {
+                    close();
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }));
 
-        JMenu helpMenu = new JMenu("Help");
+        final JMenu helpMenu = new JMenu("Help");
         helpMenu.add(createMenuItem("Show Debug Window", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -65,15 +76,24 @@ public class GUIWindow extends JFrame {
         managerPanel = new TopicManagerPanel(inQueue);
         this.add(managerPanel);
 
+        this.pack();
+
+    }
+
+    @Override
+    public void dispose() {
+        debugWindow.dispose();
+        super.dispose();
     }
 
     // basic running methods
-    private void close() {
-        inQueue.add(new InMessage(InMessage.Type.CLOSE, null));
-        JOptionPane.showMessageDialog(this, "Closing ExtempFiller2...");
+    private void close() throws InterruptedException {
+        inQueue.put(new InMessage(InMessage.Type.CLOSE, null));
+        addDebugMessage("Closing ExtempFiller2...");
     }
 
     public void start() {
+        addDebugMessage("Starting ExtempFiller2...");
         this.setVisible(true);
         inQueue.add(new InMessage(InMessage.Type.OPEN, null));
         inQueue.add(new InMessage(InMessage.Type.LOAD, null));
@@ -82,14 +102,22 @@ public class GUIWindow extends JFrame {
     public void setEnabled(boolean value) {
         managerPanel.setEnabled(value);
     }
+
     public void addDebugMessage(String msg) {
         System.out.println(msg);
         debugWindow.addDebugMessage(msg);
     }
 
-    public void showError(String msg) {
-        addDebugMessage(msg);
-        JOptionPane.showMessageDialog(this, msg);
+    public void showError(Throwable exception) {
+        addDebugMessage(exception.toString());
+
+        //Copied from throwable.java
+        StackTraceElement[] trace = exception.getStackTrace();
+        for (StackTraceElement traceElement : trace)
+            addDebugMessage("\tat " + traceElement);
+
+        //Quite annoying
+        //JOptionPane.showMessageDialog(this, exception.toString());
     }
 
     public void setTopicState(Topic topic, TopicState state) {
