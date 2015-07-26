@@ -120,12 +120,14 @@ class GUIWindow extends JFrame {
         //JOptionPane.showMessageDialog(this, exception.toString());
     }
 
+    public void removeTopic(Topic topic) { managerPanel.removeTopic(topic); }
+
     public void setTopicState(Topic topic, TopicState state) {
         managerPanel.setTopicState(topic, state);
     }
 
     public void setTopics(java.util.List<Topic> topics) {
-        managerPanel.setTopics(topics);
+        managerPanel.setResearchedTopics(topics);
     }
 
     // helper factory methods
