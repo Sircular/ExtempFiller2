@@ -11,6 +11,8 @@ import org.zalgosircular.extempfiller2.research.Article;
  */
 public class ENMLFormatter extends HTMLFormatter implements ArticleFormatter {
 
+    public static final String endl = System.getProperty("line.separator");
+
     @Override
     public String format(Article article) {
         // we'll just reuse the methods from the HTMLFormatter
@@ -27,11 +29,9 @@ public class ENMLFormatter extends HTMLFormatter implements ArticleFormatter {
         body.appendChild(infoDiv);
         body.appendChild(contentDiv);
         final String header =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                        System.getProperty("line.separator") +
-                        "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">" +
-                        System.getProperty("line.separator");
-        String bodyOutput = "<en-note>"+body.html()+"</en-note>";
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + endl +
+                        "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">" + endl;
+        String bodyOutput = "<en-note>" + endl + body.html() + endl + "</en-note>";
         return header + bodyOutput;
     }
 

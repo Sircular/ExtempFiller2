@@ -81,7 +81,11 @@ public class HTMLFormatter implements ArticleFormatter {
                 el.remove();
             } else {
                 if (!ALLOWED_TAGS.contains(el.tagName())) {
-                    el.tagName("div");
+                    if (!el.tag().isSelfClosing()) {
+                        el.tagName("div");
+                    } else {
+                        el.remove();
+                    }
                 }
                 // remove disallowed attributes
                 for (Attribute attr : el.attributes()) {
