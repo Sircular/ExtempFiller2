@@ -165,6 +165,17 @@ public class LocalTextStorage extends StorageFacility {
             outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
         }
+        try {
+            // this might seem a little expensive to be doing every
+            // time that an article is saved, but it's the only way
+            // to make sure that the cache is up to date if we choose
+            // to reload
+            saveCache();
+        } catch (IOException e) {
+            // saving the article worked properly, but saving the cache didn't
+            // we can still return true, but also pass up the error
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+        }    
         return true;
     }
 

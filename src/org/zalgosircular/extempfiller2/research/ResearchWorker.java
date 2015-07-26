@@ -93,15 +93,25 @@ public class ResearchWorker implements Runnable {
                             outQueue.put(new OutMessage(OutMessage.Type.SAVING, addTopic));
 
                             for (Article article : articles) {
+                                // we increment it here because the storage
+                                // may save the cache each time an article is
+                                // saved. we decrement if it is unsuccessful to
+                                // ensure that the count is correct.
+                                addTopic.setArticleCount(addTopic.getArticleCount() + 1);
                                 if (storage.save(addTopic, article)) {
                                     outQueue.put(new OutMessage(
                                             OutMessage.Type.SAVED,
                                             new SavedMessage(article, addTopic)
                                     ));
-                                    addTopic.setArticleCount(addTopic.getArticleCount() + 1);
+                                } else {
+                                    // if it doesn't work, the storage has already
+                                    // sent up an error message
+                                    // decrement to keep the article count correct
+                                    // (we assumed it would work and incremented
+                                    // accordingly above)
+                                    addTopic.setArticleCount(addTopic.getArticleCount() - 1);
                                 }
-                                // if it doesn't work, the storage has already
-                                // sent up an error message
+
                             }
                         }
                         outQueue.put(new OutMessage(OutMessage.Type.DONE, addTopic));
