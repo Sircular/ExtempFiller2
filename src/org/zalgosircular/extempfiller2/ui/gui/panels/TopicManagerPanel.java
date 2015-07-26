@@ -124,6 +124,7 @@ public class TopicManagerPanel extends JPanel {
     public void setResearchedTopics(java.util.List<Topic> topics) {
         final DefaultListModel<TopicListItem> model =
                 (DefaultListModel<TopicListItem>)list.getModel();
+        model.clear();
         for (Topic topic : topics) {
             TopicListItem item = new TopicListItem(topic, TopicState.RESEARCHED);
             model.addElement(item);
