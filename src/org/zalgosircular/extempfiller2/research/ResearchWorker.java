@@ -131,7 +131,6 @@ public class ResearchWorker implements Runnable {
                         break;
                 }
             } catch (InterruptedException e) {
-                outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Queue interrupted."));
                 Thread.currentThread().interrupt();
             }
         }

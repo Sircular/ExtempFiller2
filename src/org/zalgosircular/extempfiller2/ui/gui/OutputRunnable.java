@@ -63,7 +63,7 @@ class OutputRunnable implements Runnable {
                     case DELETED:
                         topic = (Topic) msg.getData();
                         addDebugMessage("Deleted message: " + topic.getTopic());
-                        setTopicState(topic, TopicManagerPanel.TopicState.DELETED);
+                        removeTopic(topic);
                         break;
                     case ERROR:
                         final ErrorMessage error = (ErrorMessage) msg.getData();
@@ -98,6 +98,15 @@ class OutputRunnable implements Runnable {
             @Override
             public void run() {
                 window.showError(exception);
+            }
+        });
+    }
+
+    private void removeTopic(final Topic topic) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                window.removeTopic(topic);
             }
         });
     }
