@@ -33,7 +33,12 @@ public class HTMLFetcher {
             e.printStackTrace();
         } catch (IOException e) {
             // this will happen quite a bit
-            final ErrorMessage err = new ErrorMessage(topic, e);
+            ErrorMessage.SEVERITY severity;
+            if (e.getMessage().contains("HTTP Error"))
+                severity = ErrorMessage.SEVERITY.WARNING;
+            else
+                severity = ErrorMessage.SEVERITY.CRITICAL;
+            final ErrorMessage err = new ErrorMessage(topic, severity, e);
             outQueue.put(new OutMessage(OutMessage.Type.ERROR, err));
         }
         return null;

@@ -132,6 +132,7 @@ public class ResearchWorker implements Runnable {
                                             OutMessage.Type.ERROR,
                                             new ErrorMessage(
                                                     erredTopic,
+                                                    ErrorMessage.SEVERITY.ERROR,
                                                     e
                                             )
                                     )

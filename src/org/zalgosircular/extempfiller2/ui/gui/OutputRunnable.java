@@ -130,7 +130,6 @@ class OutputRunnable implements Runnable {
     }
 
     private void closeWindow() {
-        addDebugMessage("Closing ExtempFiller2.");
         window.dispose();
     }
 }

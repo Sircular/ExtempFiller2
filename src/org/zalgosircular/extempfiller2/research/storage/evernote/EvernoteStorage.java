@@ -28,7 +28,6 @@ public class EvernoteStorage extends StorageFacility {
 
     @Override
     public boolean open() throws InterruptedException {
-        // because of the constructor, it's already open
         try {
             client = new EvernoteClient(EvernoteService.SANDBOX, KeyManager.getKey("evernote")); // sandbox for now
             final Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
@@ -39,7 +38,7 @@ public class EvernoteStorage extends StorageFacility {
             outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
-                            new ErrorMessage(null, e)
+                            new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)
                     )
             );
         }
@@ -63,7 +62,7 @@ public class EvernoteStorage extends StorageFacility {
             outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
-                            new ErrorMessage(erredTopic, e)
+                            new ErrorMessage(erredTopic, ErrorMessage.SEVERITY.ERROR, e)
                     )
             );
         }
@@ -90,7 +89,7 @@ public class EvernoteStorage extends StorageFacility {
             outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
-                            new ErrorMessage(null, e)
+                            new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)
                     )
             );
         }
@@ -132,7 +131,7 @@ public class EvernoteStorage extends StorageFacility {
             outQueue.put(
                     new OutMessage(
                             OutMessage.Type.ERROR,
-                            new ErrorMessage(topic, e)
+                            new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)
                     )
             );
         }
@@ -161,7 +160,7 @@ public class EvernoteStorage extends StorageFacility {
             topicCache.remove(topic);
             return true;
         } catch (Exception e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
         }
         return false;
     }

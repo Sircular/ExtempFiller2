@@ -44,7 +44,7 @@ public class LocalTextStorage extends StorageFacility {
                 Files.createFile(Paths.get(TOPICS_FILE));
             }
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
         }
         return true;
@@ -67,7 +67,7 @@ public class LocalTextStorage extends StorageFacility {
             Files.write(Paths.get(TOPICS_FILE), cache.getBytes("utf-8"),
                     StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
         }
         return true;
@@ -109,7 +109,7 @@ public class LocalTextStorage extends StorageFacility {
                 shortened.put(t, folderName);
             }
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)));
             return null;
         }
         loaded = true;
@@ -163,7 +163,7 @@ public class LocalTextStorage extends StorageFacility {
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
         }
         try {
@@ -172,7 +172,7 @@ public class LocalTextStorage extends StorageFacility {
         } catch (IOException e) {
             // saving the article worked properly, but saving the cache didn't
             // we can still return true, but also pass up the error
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
         }    
         return true;
     }
@@ -202,7 +202,7 @@ public class LocalTextStorage extends StorageFacility {
             }
             Files.delete(Paths.get(folderName));
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
         }
         return true;
