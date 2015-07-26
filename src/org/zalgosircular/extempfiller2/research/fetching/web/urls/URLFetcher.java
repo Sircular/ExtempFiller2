@@ -5,19 +5,18 @@ import org.zalgosircular.extempfiller2.research.Topic;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Walt on 7/8/2015.
  */
 public abstract class URLFetcher {
-    // todo: redo this class to be more "stream-like"
     // each implementation can handle this stream differently
-    protected final Queue<OutMessage> outQueue;
+    protected final BlockingQueue<OutMessage> outQueue;
     protected final Topic topic;
     protected final List<String> excludes;
 
-    protected URLFetcher(Queue<OutMessage> outQueue,
+    protected URLFetcher(BlockingQueue<OutMessage> outQueue,
                          Topic topic,
                          List<String> excludes) {
         this.outQueue = outQueue;
@@ -25,7 +24,7 @@ public abstract class URLFetcher {
         this.excludes = excludes;
     }
 
-    public abstract URI getNext();
+    public abstract URI getNext() throws InterruptedException;
 
-    public abstract boolean hasNext();
+    public abstract boolean hasNext() throws InterruptedException;
 }

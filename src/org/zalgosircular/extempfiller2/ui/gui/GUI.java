@@ -1,14 +1,8 @@
 package org.zalgosircular.extempfiller2.ui.gui;
 
-import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
-import org.zalgosircular.extempfiller2.research.Topic;
-import org.zalgosircular.extempfiller2.ui.gui.TopicManagerPanel.TopicState;
 
-import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -16,144 +10,18 @@ import java.util.concurrent.BlockingQueue;
  */
 public class GUI {
     private final GUIWindow window;
-    private final BlockingQueue<OutMessage> outQueue;
+    private final Thread outputThread;
 
     public GUI(BlockingQueue<InMessage> inQueue, BlockingQueue<OutMessage> outQueue) {
         this.window = new GUIWindow(inQueue);
-        this.outQueue = outQueue;
+        this.outputThread = new Thread(new OutputRunnable(window, outQueue));
+        this.outputThread.setName("OutMessage Loop");
     }
 
-    public void run() {
+    public void start() {
         window.init();
-        SwingUtilities.invokeLater(new Runnable(){
-            public void run() {
-                window.start();
-            }
-        });
-
-        addDebugMessage("Initializing ExtempFiller2...");
-
-        boolean running = true;
-        setWindowEnabled(false); // wait until topics are loaded
-        while (running) {
-            try {
-                OutMessage msg = outQueue.take();
-                Topic topic;
-                switch (msg.getMessageType()) {
-                    case LOADING:
-                        addDebugMessage("Loading topics from filesystem...");
-                        setWindowEnabled(false);
-                        break;
-                    case LOADED:
-                        addDebugMessage("Loaded topics from filesystem.");
-                        setWindowEnabled(true);
-                        window.setTopics((List<Topic>)msg.getData());
-                        break;
-                    case RETRIEVED:
-                        addDebugMessage("Loaded topics from cache.");
-                        break;
-                    case DEBUG:
-                        addDebugMessage((String) msg.getData());
-                        break;
-                    case SEARCHING:
-                        topic = (Topic)msg.getData();
-                        addDebugMessage("Now researching topic: "+topic.getTopic());
-                        setTopicState(topic, TopicState.RESEARCHING);
-                        break;
-                    case DONE:
-                        topic = (Topic)msg.getData();
-                        addDebugMessage("Finished researching message: "+topic.getTopic());
-                        setTopicState(topic, TopicState.RESEARCHED);
-                        break;
-                    case DELETING:
-                        topic = (Topic)msg.getData();
-                        addDebugMessage("Deleting message: "+topic.getTopic());
-                        setTopicState(topic, TopicState.DELETING);
-                        break;
-                    case DELETED:
-                        topic = (Topic)msg.getData();
-                        addDebugMessage("Deleted message: "+topic.getTopic());
-                        removeTopic(topic);
-                        break;
-                    case ERROR:
-                        ErrorMessage error = (ErrorMessage)msg.getData();
-                        if (error.getTopic() != null) {
-                            addDebugMessage("Error researching message: " + error.getTopic().getTopic());
-                            // todo: report only fatal errors
-                            setTopicState(error.getTopic(), TopicState.ERROR);
-                        }
-                        showError(error.getException().getMessage());
-                        break;
-                    case CLOSED:
-                        closeWindow();
-                        running = false;
-                        break;
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        System.exit(0);
+        window.start();
+        outputThread.start();
     }
 
-    private void addDebugMessage(final String msg) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                window.addDebugMessage(msg);
-            }
-        });
-    }
-
-    private void showError(final String msg) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                window.showError(msg);
-            }
-        });
-    }
-
-    private void removeTopic(final Topic topic) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                window.removeTopic(topic);
-            }
-        });
-    }
-
-    private void setTopicState(final Topic topic, final TopicState state) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                window.setTopicState(topic, state);
-            }
-        });
-    }
-
-    private void setWindowEnabled(final boolean value) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                window.setEnabled(value);
-            }
-        });
-    }
-
-    private void closeWindow() {
-        System.out.println("Closing ExtempFiller2.");
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    window.dispose();
-                }
-            });
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            return;
-        }
-    }
 }

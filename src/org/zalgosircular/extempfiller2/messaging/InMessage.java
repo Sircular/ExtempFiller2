@@ -1,7 +1,5 @@
 package org.zalgosircular.extempfiller2.messaging;
 
-import org.zalgosircular.extempfiller2.research.Topic;
-
 /**
  * Created by Walt on 7/8/2015.
  */
@@ -39,7 +37,7 @@ public class InMessage {
         LOAD(Object.class), // reload from "filesystem"
         GET(Object.class), // get from cache if possible
         RESEARCH(String.class),
-        DELETE(Topic.class),
+        DELETE(String.class),
         OPEN(Object.class),
         CLOSE(Object.class);
 

@@ -33,5 +33,4 @@ public class Topic {
     public boolean equals(Object o) {
         return (o instanceof Topic && ((Topic) o).getTopic().equals(this.topic));
     }
-
 }

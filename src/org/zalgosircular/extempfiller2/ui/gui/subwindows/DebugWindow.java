@@ -1,4 +1,4 @@
-package org.zalgosircular.extempfiller2.ui.gui;
+package org.zalgosircular.extempfiller2.ui.gui.subwindows;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;

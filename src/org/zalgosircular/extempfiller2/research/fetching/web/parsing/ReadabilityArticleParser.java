@@ -8,7 +8,7 @@ import org.zalgosircular.extempfiller2.research.Article;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Walt on 7/9/2015.
@@ -17,12 +17,12 @@ public class ReadabilityArticleParser extends ArticleParser {
 
     private final SimpleDateFormat formatter;
 
-    public ReadabilityArticleParser(Queue<OutMessage> outQueue) {
+    public ReadabilityArticleParser(BlockingQueue<OutMessage> outQueue) {
         super(outQueue);
         formatter = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
     }
 
-    public Article parse(String readabilityHTML) {
+    public Article parse(String readabilityHTML) throws InterruptedException {
         // create a jsoup document
         final Document doc = Jsoup.parse(readabilityHTML);
         final String url = doc.select("url").text();
@@ -35,7 +35,7 @@ public class ReadabilityArticleParser extends ArticleParser {
         } catch (ParseException e) {
             // send up a debug message
             // it's not critical
-            this.outQueue.add(new OutMessage(OutMessage.Type.DEBUG, String.format(
+            this.outQueue.put(new OutMessage(OutMessage.Type.DEBUG, String.format(
                     "Could not parse date for page '%s'", url)));
         }
         final String title = doc.select("title").text();

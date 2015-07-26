@@ -5,8 +5,8 @@ package org.zalgosircular.extempfiller2.research.fetching.web.urls;
  */
 public enum SEARCH_ENGINE {
     GOOGLE("http://www.google.com/search?q=%s&start=%s",
-            "div#ires li.g h3.r a",
-            "div#foot table#nav tbody tr td.b a span"
+            "div#ires ol#rso div.srg div.g div.rc h3.r a",
+            "div#foot span#xjs div#navcnt table#nav tbody tr td.b a.pn span"
     ),
     DDG("http://duckduckgo.com/html/?q=%s&s=%s",
             "div#links div.links_main.links_deep a",
