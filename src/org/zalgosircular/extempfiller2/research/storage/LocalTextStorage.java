@@ -8,6 +8,7 @@ import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -166,10 +167,7 @@ public class LocalTextStorage extends StorageFacility {
             return false;
         }
         try {
-            // this might seem a little expensive to be doing every
-            // time that an article is saved, but it's the only way
-            // to make sure that the cache is up to date if we choose
-            // to reload
+            // TODO: Change to append to cache
             saveCache();
         } catch (IOException e) {
             // saving the article worked properly, but saving the cache didn't
@@ -208,5 +206,25 @@ public class LocalTextStorage extends StorageFacility {
             return false;
         }
         return true;
+    }
+
+    private void saveCache() throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        final String endl = System.getProperty("line.separator");
+        for (Topic t : topics) {
+            sb.append(t.getTopic());
+            sb.append(SEP);
+            sb.append(shortened.get(t));
+            sb.append(SEP);
+            sb.append(t.getArticleCount());
+            sb.append(endl);
+        }
+        final String cache = sb.toString();
+        try {
+            Files.write(Paths.get(TOPICS_FILE), cache.getBytes("utf-8"),
+                    StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (UnsupportedEncodingException e) {
+            // will not happen
+        }
     }
 }
