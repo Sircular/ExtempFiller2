@@ -87,6 +87,17 @@ public class TopicManagerPanel extends JPanel {
         }
     }
 
+    public boolean removeTopic(Topic topic) {
+        DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
+        for (int i = 0; i < model.size(); i++) {
+            if (model.get(i).getTopic().equals(topic)) {
+                model.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void setTopicState(Topic topic, TopicState state) {
         DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
         boolean found = false;
@@ -97,23 +108,14 @@ public class TopicManagerPanel extends JPanel {
                 found = true;
             }
         }
-        // we need to make a more elegant way to add topics
-        if (!found && (state == TopicState.RESEARCHING || state == TopicState.QUEUED_RESEARCH)) { // assume it's new
-            model.addElement(new TopicListItem(topic, state));
-            list.repaint();
-        }
     }
 
     public void setTopicState(int topic, TopicState state) {
         DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>)list.getModel();
         if (topic < model.size()) {
-            if (state == TopicState.DELETED) {
-                model.remove(topic);
-            } else {
-                model.get(topic).setState(state);
-            }
+            model.get(topic).setState(state);
+            list.repaint();
         }
-        list.repaint();
     }
 
     public void setResearchedTopics(java.util.List<Topic> topics) {
@@ -218,9 +220,6 @@ public class TopicManagerPanel extends JPanel {
                 case DELETING:
                     stateStr = "Deleting";
                     break;
-                case DELETED:
-                    stateStr = ""; // this should not happen
-                    break;
                 case ERROR:
                     stateStr = "Research Error";
                     break;
@@ -250,7 +249,6 @@ public class TopicManagerPanel extends JPanel {
         RESEARCHED,
         QUEUED_DELETION,
         DELETING,
-        DELETED, // used to delete a topic from a list
         ERROR
     }
 

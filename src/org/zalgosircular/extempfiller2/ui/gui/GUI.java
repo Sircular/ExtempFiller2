@@ -73,12 +73,13 @@ public class GUI {
                     case DELETED:
                         topic = (Topic)msg.getData();
                         addDebugMessage("Deleted message: "+topic.getTopic());
-                        setTopicState(topic, TopicState.DELETED);
+                        removeTopic(topic);
                         break;
                     case ERROR:
                         ErrorMessage error = (ErrorMessage)msg.getData();
                         if (error.getTopic() != null) {
                             addDebugMessage("Error researching message: " + error.getTopic().getTopic());
+                            // todo: report only fatal errors
                             setTopicState(error.getTopic(), TopicState.ERROR);
                         }
                         showError(error.getException().getMessage());
@@ -109,6 +110,15 @@ public class GUI {
             @Override
             public void run() {
                 window.showError(msg);
+            }
+        });
+    }
+
+    private void removeTopic(final Topic topic) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                window.removeTopic(topic);
             }
         });
     }

@@ -92,6 +92,8 @@ public class GUIWindow extends JFrame {
         JOptionPane.showMessageDialog(this, msg);
     }
 
+    public void removeTopic(Topic topic) { managerPanel.removeTopic(topic); }
+
     public void setTopicState(Topic topic, TopicState state) {
         managerPanel.setTopicState(topic, state);
     }
