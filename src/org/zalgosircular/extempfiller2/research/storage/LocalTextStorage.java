@@ -197,6 +197,11 @@ public class LocalTextStorage extends StorageFacility {
             outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
         }
+        try {
+            saveCache();
+        } catch (IOException e) {
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+        }
         return true;
     }
 
