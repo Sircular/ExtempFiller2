@@ -9,7 +9,7 @@ import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.formatting.TextFormatter;
 import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
-import org.zalgosircular.extempfiller2.ui.CLI;
+import org.zalgosircular.extempfiller2.ui.cli.CLI;
 import org.zalgosircular.extempfiller2.ui.gui.GUI;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -49,12 +49,12 @@ public class ExtempFiller2 {
     private static void runCLI(BlockingQueue<InMessage> inQueue,
                                BlockingQueue<OutMessage> outQueue) {
         CLI cli = new CLI(inQueue, outQueue);
-        cli.run();
+        cli.start();
     }
 
     private static void runGUI(BlockingQueue<InMessage> inQueue,
                                BlockingQueue<OutMessage> outQueue) {
-        GUI cli = new GUI(inQueue, outQueue);
-        cli.run();
+        GUI gui = new GUI(inQueue, outQueue);
+        gui.start();
     }
 }
