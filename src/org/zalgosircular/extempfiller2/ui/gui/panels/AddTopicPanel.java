@@ -89,7 +89,7 @@ public class AddTopicPanel extends JPanel {
     }
 
     private void enqueueTopic(String topic) throws InterruptedException {
-        manager.setTopicState(new Topic(topic), TopicManagerPanel.TopicState.QUEUED_RESEARCH);
+        manager.addTopic(new Topic(topic));
         inQueue.put(new InMessage(InMessage.Type.RESEARCH, topic));
     }
 }
