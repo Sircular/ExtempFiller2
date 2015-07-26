@@ -165,8 +165,6 @@ public class LocalTextStorage extends StorageFacility {
             outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
         }
-        //update topic
-        topic.setArticleCount(topic.getArticleCount() + 1);
         return true;
     }
 
