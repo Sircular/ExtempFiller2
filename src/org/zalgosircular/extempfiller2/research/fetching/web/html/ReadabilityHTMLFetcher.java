@@ -26,7 +26,7 @@ public class ReadabilityHTMLFetcher extends HTMLFetcher {
             );
             return super.getResponse(target, topic);
         } catch (URISyntaxException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
         }
         return null;
     }

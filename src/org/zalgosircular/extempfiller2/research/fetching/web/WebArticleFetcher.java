@@ -62,6 +62,7 @@ public class WebArticleFetcher extends ArticleFetcher {
                             OutMessage.Type.ERROR,
                             new ErrorMessage(
                                     topic,
+                                    ErrorMessage.SEVERITY.CRITICAL,
                                     new RuntimeException("No articles found")
                             )
                     )

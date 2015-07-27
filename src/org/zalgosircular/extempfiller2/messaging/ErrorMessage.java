@@ -7,15 +7,21 @@ import org.zalgosircular.extempfiller2.research.Topic;
  */
 public class ErrorMessage {
     private final Topic topic;
+    private final SEVERITY severity;
     private final Exception ex;
 
-    public ErrorMessage(Topic topic, Exception ex) {
+    public ErrorMessage(Topic topic, SEVERITY severity, Exception ex) {
         this.topic = topic;
+        this.severity = severity;
         this.ex = ex;
     }
 
     public Topic getTopic() {
         return topic;
+    }
+
+    public SEVERITY getSeverity() {
+        return severity;
     }
 
     public Exception getException() {
@@ -24,8 +30,17 @@ public class ErrorMessage {
 
     @Override
     public String toString() {
-        return String.format("Error(%s, %s)",
+        return String.format("[%s] (%s, %s)",
+                severity.name(),
                 topic == null ? "null" : topic.toString(),
                 ex == null ? "null" : ex.toString());
+    }
+
+    public enum SEVERITY {
+        ALERT,
+        CRITICAL,
+        ERROR,
+        WARNING,
+        NOTICE
     }
 }
