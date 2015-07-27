@@ -126,15 +126,25 @@ public class TopicManagerPanel extends JPanel {
         return false;
     }
 
+    public void updateArticleCount(Topic topic) {
+        final DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>) list.getModel();
+        boolean found = false;
+        for (int i = 0; i < model.size() && !found; i++) {
+            // the equals method doesn't compare article count
+            Topic t;
+            if ((t = model.get(i).getTopic()).equals(topic)) {
+                t.setArticleCount(topic.getArticleCount());
+                found = true;
+            }
+        }
+    }
+
     public void setTopicState(Topic topic, TopicState state) {
         final DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>) list.getModel();
         boolean found = false;
         for (int i = 0; i < model.size() && !found; i++) {
             final TopicListItem item = model.get(i);
             if (item.getTopic().equals(topic)) {
-                // todo: reorganize this code to make it less hacky
-                // update the article count
-                item.getTopic().setArticleCount(topic.getArticleCount());
                 setTopicState(i, state);
                 found = true;
             }
