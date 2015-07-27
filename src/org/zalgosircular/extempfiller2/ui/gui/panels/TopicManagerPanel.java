@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
@@ -69,9 +70,33 @@ public class TopicManagerPanel extends JPanel {
     private void deleteSelectedTopics() throws InterruptedException {
         final int[] selected = list.getSelectedIndices();
         final DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>) list.getModel();
+        final java.util.List<Topic> toRemove = new ArrayList<Topic>();
+        boolean invalid = false;
+
         for (int i : selected) {
-            setTopicState(i, TopicState.QUEUED_DELETION);
-            inQueue.put(new InMessage(InMessage.Type.DELETE, model.get(i).getTopic().getTopic()));
+            final TopicListItem item = model.get(i);
+            switch (item.getState()) {
+                case RESEARCHED:
+                    setTopicState(item.getTopic(), TopicState.DELETING);
+                    inQueue.put(new InMessage(InMessage.Type.DELETE, item.getTopic().getTopic()));
+                    break;
+                case QUEUED_RESEARCH:
+                    toRemove.add(item.getTopic());
+                    break;
+                default:
+                    invalid = true;
+                    break;
+            }
+        }
+        for (Topic t : toRemove) {
+            removeTopic(t);
+            // to negate the previous message sent
+            inQueue.put(new InMessage(InMessage.Type.DELETE, t.getTopic()));
+        }
+        // todo: make the GUIWindow show this instead
+        if (invalid) {
+            JOptionPane.showMessageDialog(this, "Please wait until the current operation is finished.",
+                    "ExtempFiller2", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -107,6 +132,9 @@ public class TopicManagerPanel extends JPanel {
         for (int i = 0; i < model.size() && !found; i++) {
             final TopicListItem item = model.get(i);
             if (item.getTopic().equals(topic)) {
+                // todo: reorganize this code to make it less hacky
+                // update the article count
+                item.getTopic().setArticleCount(topic.getArticleCount());
                 setTopicState(i, state);
                 found = true;
             }
@@ -160,31 +188,31 @@ public class TopicManagerPanel extends JPanel {
 
         @Override
         public String toString() {
-            String stateStr = "";
+            String stateStr;
             switch (getState()) {
                 case QUEUED_RESEARCH:
-                    stateStr = "Queued for Research";
+                    stateStr = "[Queued for Research]";
                     break;
                 case RESEARCHING:
-                    stateStr = "Researching";
+                    stateStr = "[Researching]";
                     break;
                 case RESEARCHED:
-                    stateStr = "Researched";
+                    stateStr = "[Researched]["+getTopic().getArticleCount()+"]";
                     break;
                 case QUEUED_DELETION:
-                    stateStr = "Queued for Deletion";
+                    stateStr = "[Queued for Deletion]";
                     break;
                 case DELETING:
-                    stateStr = "Deleting";
+                    stateStr = "[Deleting]";
                     break;
                 case ERROR:
-                    stateStr = "Research Error";
+                    stateStr = "[Research Error]";
                     break;
                 default:
-                    stateStr = "?";
+                    stateStr = "[?]";
                     break;
             }
-            return String.format("[%s] %s", stateStr, topic.getTopic());
+            return String.format("%s %s", stateStr, topic.getTopic());
         }
 
         public Topic getTopic() {
