@@ -68,10 +68,13 @@ class OutputRunnable implements Runnable {
                     case ERROR:
                         final ErrorMessage error = (ErrorMessage) msg.getData();
                         if (error.getTopic() != null) {
-                            addDebugMessage("Error researching message: " + error.getTopic().getTopic());
-                            setTopicState(error.getTopic(), TopicManagerPanel.TopicState.ERROR);
+                            addDebugMessage("Error researching topic: " + error.getTopic().getTopic());
+                            addDebugMessage("Severity: " + error.getSeverity().name());
+                            if (error.getSeverity() == ErrorMessage.SEVERITY.CRITICAL ||
+                                    error.getSeverity() == ErrorMessage.SEVERITY.ERROR)
+                                setTopicState(error.getTopic(), TopicManagerPanel.TopicState.ERROR);
                         }
-                        showError(error.getException());
+                        showError(error);
                         break;
                     case CLOSED:
                         closeWindow();
@@ -93,11 +96,11 @@ class OutputRunnable implements Runnable {
         });
     }
 
-    private void showError(final Throwable exception) {
+    private void showError(final ErrorMessage msg) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                window.showError(exception);
+                window.showError(msg);
             }
         });
     }

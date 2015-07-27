@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.ui.gui;
 
+import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel;
@@ -60,7 +61,7 @@ class GUIWindow extends JFrame {
                 try {
                     loadTopicsFromFile();
                 } catch (IOException e1) {
-                    showError(e1);
+                    outputError(e1);
                 }
             }
         }));
@@ -130,16 +131,23 @@ class GUIWindow extends JFrame {
         debugWindow.addDebugMessage(msg);
     }
 
-    public void showError(Throwable exception) {
+    public void showError(ErrorMessage msg) {
+        outputError(msg.getException());
+
+        //Quite annoying, but useful
+        if (msg.getSeverity() == ErrorMessage.SEVERITY.ERROR ||
+                msg.getSeverity() == ErrorMessage.SEVERITY.CRITICAL)
+            // todo: add intelligent error messages
+            JOptionPane.showMessageDialog(this, msg.getException().getMessage());
+    }
+
+    public void outputError(Throwable exception) {
         addDebugMessage(exception.toString());
 
         //Copied from throwable.java
         StackTraceElement[] trace = exception.getStackTrace();
         for (StackTraceElement traceElement : trace)
             addDebugMessage("\tat " + traceElement);
-
-        //Quite annoying
-        //JOptionPane.showMessageDialog(this, exception.toString());
     }
 
     public void removeTopic(Topic topic) {
