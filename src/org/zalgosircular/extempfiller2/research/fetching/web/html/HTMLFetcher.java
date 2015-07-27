@@ -34,7 +34,7 @@ public class HTMLFetcher {
         } catch (IOException e) {
             // this will happen quite a bit
             ErrorMessage.SEVERITY severity;
-            if (e.getMessage().contains("HTTP Error"))
+            if (e.getMessage().toLowerCase().contains("http error"))
                 severity = ErrorMessage.SEVERITY.WARNING;
             else
                 severity = ErrorMessage.SEVERITY.CRITICAL;
