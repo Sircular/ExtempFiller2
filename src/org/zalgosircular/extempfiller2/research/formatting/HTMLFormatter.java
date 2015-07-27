@@ -21,9 +21,11 @@ public class HTMLFormatter implements ArticleFormatter {
 
     // these tags will be completely removed
     protected static final List<String> DISALLOWED_TAGS = Arrays.asList(("applet base basefont bgsound blink button dir embed fieldset form " +
-            "frame frameset iframe ilayer img input isindex label layer legend link marquee " +
+            "frame frameset iframe ilayer input isindex label layer legend link marquee " +
             "menu meta noframes noscript object optgroup option param plaintext script " +
             "select style textarea xml").split(" +"));
+
+    protected static final List<String> ALLOED_IMG_ATTRS = Arrays.asList(("src width height").split(" +"));
 
     protected static final List<String> ALLOWED_ATTRS =
             Arrays.asList(("href style rel").split(" +"));
@@ -87,10 +89,18 @@ public class HTMLFormatter implements ArticleFormatter {
                         el.remove();
                     }
                 }
-                // remove disallowed attributes
-                for (Attribute attr : el.attributes()) {
-                    if (!ALLOWED_ATTRS.contains(attr.getKey().toLowerCase())) {
-                        el.removeAttr(attr.getKey());
+                if (el.tagName().equals("img")) {
+                    for (Attribute attr : el.attributes()) {
+                        if (!ALLOED_IMG_ATTRS.contains(attr.getKey().toLowerCase())) {
+                            el.removeAttr(attr.getKey());
+                        }
+                    }
+                } else {
+                    // remove disallowed attributes
+                    for (Attribute attr : el.attributes()) {
+                        if (!ALLOWED_ATTRS.contains(attr.getKey().toLowerCase()) || attr.getValue().equals("")) {
+                            el.removeAttr(attr.getKey());
+                        }
                     }
                 }
             }
