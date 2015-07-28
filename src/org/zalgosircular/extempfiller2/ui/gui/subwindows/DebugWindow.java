@@ -41,16 +41,16 @@ public class DebugWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 outputPath = selectFileOutputPath();
-                if (outputPath != "")
+                if (!outputPath.equals(""))
                     saveLog(outputPath);
             }
         });
         saveItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (outputPath == "")
+                if (outputPath.equals(""))
                     outputPath = selectFileOutputPath();
-                if (outputPath != "")
+                if (!outputPath.equals(""))
                     saveLog(outputPath);
             }
         });

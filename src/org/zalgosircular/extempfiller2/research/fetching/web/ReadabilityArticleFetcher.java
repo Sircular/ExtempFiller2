@@ -5,9 +5,7 @@ import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.research.fetching.ArticleFetcher;
-import org.zalgosircular.extempfiller2.research.fetching.web.html.HTMLFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.html.ReadabilityHTMLFetcher;
-import org.zalgosircular.extempfiller2.research.fetching.web.parsing.ArticleParser;
 import org.zalgosircular.extempfiller2.research.fetching.web.parsing.ReadabilityArticleParser;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SearchEngineFetcher;
@@ -21,24 +19,21 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by Logan Lembke on 7/12/2015.
  */
-public class WebArticleFetcher extends ArticleFetcher {
+public class ReadabilityArticleFetcher extends ArticleFetcher {
     private final SEARCH_ENGINE searchEngine;
-    private final HTMLFetcher htmlFetcher;
-    private final ArticleParser articleParser;
+    private final ReadabilityHTMLFetcher readabilityFetcher;
+    private final ReadabilityArticleParser readabilityArticleParser;
 
-    public WebArticleFetcher(BlockingQueue<OutMessage> outQueue, SEARCH_ENGINE searchEngine/*, boolean readability*/) {
+    public ReadabilityArticleFetcher(BlockingQueue<OutMessage> outQueue, SEARCH_ENGINE searchEngine) {
         super(outQueue);
         this.searchEngine = searchEngine;
-        //if (readability) {
-        this.htmlFetcher = new ReadabilityHTMLFetcher(outQueue);
-        this.articleParser = new ReadabilityArticleParser(outQueue);
-        //}
-        /*
-        else {
-            this.htmlFetcher = new HTMLFetcher(outQueue);
-            //TODO: Figure out what we want to do with straight html...
-            this.articleParser = null;
-        }*/
+        this.readabilityFetcher = new ReadabilityHTMLFetcher(outQueue);
+        this.readabilityArticleParser = new ReadabilityArticleParser(outQueue);
+    }
+
+    public boolean open() throws InterruptedException {
+        readabilityFetcher.auth();
+        return true;
     }
 
     public List<Article> fetchArticles(Topic topic, int maxResults, List<String> excludes) throws InterruptedException {
@@ -47,9 +42,9 @@ public class WebArticleFetcher extends ArticleFetcher {
         int articlesFound = 0;
         while (articlesFound < maxResults && urlFetcher.hasNext()) {
             final URI url = urlFetcher.getNext();
-            final String response = htmlFetcher.getResponse(url, topic);
+            final String response = readabilityFetcher.getResponse(url, topic);
             if (response != null) {
-                final Article article = articleParser.parse(response);
+                final Article article = readabilityArticleParser.parse(response);
                 if (article != null) {
                     articles.add(article);
                     articlesFound++;

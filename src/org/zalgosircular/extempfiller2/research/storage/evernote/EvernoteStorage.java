@@ -3,7 +3,8 @@ package org.zalgosircular.extempfiller2.research.storage.evernote;
 import com.evernote.auth.EvernoteService;
 import com.evernote.edam.type.Notebook;
 import com.evernote.edam.type.Tag;
-import org.zalgosircular.extempfiller2.authentication.KeyManager;
+import org.zalgosircular.extempfiller2.authentication.AuthManager;
+import org.zalgosircular.extempfiller2.authentication.AuthRequest;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
@@ -30,7 +31,14 @@ public class EvernoteStorage extends StorageFacility {
     public boolean open() throws InterruptedException {
         // because of the constructor, it's already open
         try {
-            client = new EvernoteClient(EvernoteService.SANDBOX, KeyManager.getKey("evernote")); // sandbox for now
+            client = new EvernoteClient(EvernoteService.SANDBOX,
+                    AuthManager.requestAuth(
+                            outQueue,
+                            new AuthRequest(
+                                    new String[]{"evernote"}
+                            )
+                    ).getResponses()[0]
+            ); // sandbox for now
             final Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
             if (HTMLNotebook == null) {
                 client.createNotebook(RESEARCH_NOTEBOOK);

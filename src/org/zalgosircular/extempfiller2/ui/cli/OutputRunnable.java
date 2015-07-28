@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.ui.cli;
 
+import org.zalgosircular.extempfiller2.authentication.AuthRequest;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.messaging.SavedMessage;
@@ -36,6 +37,14 @@ class OutputRunnable implements Runnable {
                     case DEBUG:
                         msgStr = (String) msg.getData();
                         out.println("[DEBUG] " + msgStr);
+                        break;
+                    case AUTH_REQUEST:
+                        AuthRequest authRequest = (AuthRequest) msg.getData();
+                        out.println("Requesting authentication data for: ");
+                        for (String authField : authRequest.getAuthFields()) {
+                            out.println("\t" + authField);
+                        }
+                        out.println("Use the auth command to enter the data");
                         break;
                     case SEARCHING:
                         topic = (Topic) msg.getData();

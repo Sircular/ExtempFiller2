@@ -13,12 +13,16 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * Created by Walt on 7/9/2015.
+ *
+ * Comments from Logan: Never instantiate a thread of this runnable outside the get thread method.
+ * The get thread method sets up important parameters for the thread
  */
 public class ResearchWorker implements Runnable {
 
     private final static int MAX_ARTICLES = 10; // we'll add a way to change this later
 
     private Thread researchThread = null;
+    public final static String THREAD_NAME = "Research Worker";
 
     private final BlockingQueue<InMessage> inQueue;
     private final BlockingQueue<OutMessage> outQueue;
@@ -48,6 +52,7 @@ public class ResearchWorker implements Runnable {
                 final InMessage msg = inQueue.take();
                 switch (msg.getMessageType()) {
                     case OPEN:
+                        fetcher.open();
                         storage.open();
                         break;
                     case CLOSE:
@@ -138,8 +143,10 @@ public class ResearchWorker implements Runnable {
     }
 
     public Thread getThread() {
-        if (researchThread == null)
+        if (researchThread == null) {
             researchThread = new Thread(this);
+            researchThread.setName(THREAD_NAME);
+        }
         return researchThread;
     }
 }

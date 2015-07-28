@@ -147,7 +147,7 @@ public class TopicManagerPanel extends JPanel {
 
         @Override
         public String toString() {
-            String stateStr = "";
+            String stateStr;
             switch (getState()) {
                 case QUEUED_RESEARCH:
                     stateStr = "Queued for Research";

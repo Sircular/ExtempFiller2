@@ -4,7 +4,7 @@ import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.ResearchWorker;
 import org.zalgosircular.extempfiller2.research.fetching.ArticleFetcher;
-import org.zalgosircular.extempfiller2.research.fetching.web.WebArticleFetcher;
+import org.zalgosircular.extempfiller2.research.fetching.web.ReadabilityArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.formatting.HTMLFormatter;
 import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
@@ -22,7 +22,7 @@ public class ExtempFiller2 {
     public static void main(String[] args) {
         final BlockingQueue<InMessage> inQueue = new ArrayBlockingQueue<InMessage>(1024);
         final BlockingQueue<OutMessage> outQueue = new ArrayBlockingQueue<OutMessage>(1024);
-        final ArticleFetcher fetcher = new WebArticleFetcher(outQueue, SEARCH_ENGINE.GOOGLE);
+        final ArticleFetcher fetcher = new ReadabilityArticleFetcher(outQueue, SEARCH_ENGINE.GOOGLE);
         final StorageFacility storage = new LocalTextStorage(outQueue, new HTMLFormatter());
         final ResearchWorker worker = new ResearchWorker(inQueue, outQueue, fetcher, storage);
         worker.getThread().start();

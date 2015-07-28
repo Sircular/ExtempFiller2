@@ -17,5 +17,6 @@ public abstract class ArticleFetcher {
         this.outQueue = outQueue;
     }
 
+    public abstract boolean open() throws InterruptedException;
     public abstract List<Article> fetchArticles(Topic topic, int maxResults, List<String> excludes) throws InterruptedException;
 }

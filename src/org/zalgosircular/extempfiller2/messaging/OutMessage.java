@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.messaging;
 
+import org.zalgosircular.extempfiller2.authentication.AuthRequest;
 import org.zalgosircular.extempfiller2.research.Topic;
 
 import java.util.List;
@@ -50,7 +51,8 @@ public class OutMessage {
         RETRIEVED(List.class),
         CLOSED(Object.class),
         DELETING(Topic.class),
-        DELETED(Topic.class);
+        DELETED(Topic.class),
+        AUTH_REQUEST(AuthRequest.class);
 
         private final Class dataType;
 

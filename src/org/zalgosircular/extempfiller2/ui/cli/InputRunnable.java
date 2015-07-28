@@ -1,5 +1,7 @@
 package org.zalgosircular.extempfiller2.ui.cli;
 
+import org.zalgosircular.extempfiller2.authentication.AuthManager;
+import org.zalgosircular.extempfiller2.authentication.AuthResponse;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 
 import java.io.BufferedReader;
@@ -9,8 +11,10 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 /**
  * Created by Logan Lembke on 7/25/2015.
@@ -35,7 +39,6 @@ class InputRunnable implements Runnable {
                 final String[] words = getInput(reader);
                 if (words.length > 0) {
                     final String command = words[0].toLowerCase();
-
                     if (command.equals("research")) {
                         research(words);
                     } else if (command.equals("researchfile")) {
@@ -44,6 +47,8 @@ class InputRunnable implements Runnable {
                         delete(words);
                     } else if (command.equals("view")) {
                         inQueue.put(new InMessage(InMessage.Type.GET, null));
+                    } else if (command.equals("auth")) {
+                        auth(reader);
                     } else if (command.equals("exit") ||
                             command.equals("quit") ||
                             command.equals("close")) {
@@ -131,5 +136,31 @@ class InputRunnable implements Runnable {
         } else {
             System.err.println("Syntax: delete <topic>");
         }
+    }
+
+    private void auth(BufferedReader reader) throws InterruptedException, IOException {
+        System.out.println("Entering authentication prompt...");
+        System.out.println("On each line enter an authentication field and value");
+        System.out.println("Separated by || [no spaces]");
+        System.out.println("\'end\' to stop authentication");
+        String[] words;
+        List<String> fields = new ArrayList<String>();
+        List<String> values = new ArrayList<String>();
+        while (!(words = getInput(reader))[0].toLowerCase().equals("end")) {
+            try {
+                String[] entry = words[0].split(Pattern.quote("||"));
+                fields.add(entry[0]);
+                values.add(entry[1]);
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                System.out.println("Invalid authentication");
+            }
+        }
+        AuthResponse response = new AuthResponse(
+                fields.toArray(
+                        new String[fields.size()]),
+                values.toArray(
+                        new String[values.size()])
+        );
+        AuthManager.respondAuth(response);
     }
 }
