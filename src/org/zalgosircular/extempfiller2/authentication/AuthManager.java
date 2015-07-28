@@ -75,7 +75,7 @@ public class AuthManager {
             }
         }
 
-        String[] authFields = request.getAuthFields();
+        String[] authFields = request.getRequestFields();
         String[] authResponses = new String[authFields.length];
         //store array position and name together
         HashMap<Integer, String> missedFields = new HashMap<Integer, String>(authFields.length);
@@ -103,8 +103,28 @@ public class AuthManager {
                 authResponses[entry.getKey()] = keyMap.get(entry.getValue());
             }
         }
-
+        outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Successfully loaded auth data for " + request.toString()));
         return new AuthResponse(authFields, authResponses);
+    }
+
+    public static AuthResponse requestNewAuth(BlockingQueue<OutMessage> outQueue, AuthRequest request) throws InterruptedException {
+        //First access
+        if (keyMap.size() == 0) {
+            try {
+                initMap();
+            } catch (IOException e) {
+                //Happens when the file is inaccessible for operating system reasons (permissions etc)
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        for (String s : request.getRequestFields()) {
+            if (keyMap.containsKey(s))
+                keyMap.remove(s);
+        }
+
+        return requestAuth(outQueue, request);
     }
 
     public static void respondAuth(AuthResponse response) {

@@ -1,6 +1,7 @@
 package org.zalgosircular.extempfiller2.research.storage.evernote;
 
 import com.evernote.auth.EvernoteService;
+import com.evernote.edam.error.EDAMUserException;
 import com.evernote.edam.type.Notebook;
 import com.evernote.edam.type.Tag;
 import org.zalgosircular.extempfiller2.authentication.AuthManager;
@@ -22,6 +23,9 @@ public class EvernoteStorage extends StorageFacility {
     private EvernoteClient client;
     private static final String RESEARCH_NOTEBOOK = "Web Notes";
     private List<Topic> topicCache = null;
+    private static final AuthRequest evernoteAuth = new AuthRequest(
+            new String[]{"evernote"}
+    );
 
     public EvernoteStorage(BlockingQueue<OutMessage> outQueue, ENMLFormatter formatter) {
         super(outQueue, formatter);
@@ -34,9 +38,7 @@ public class EvernoteStorage extends StorageFacility {
             client = new EvernoteClient(EvernoteService.SANDBOX,
                     AuthManager.requestAuth(
                             outQueue,
-                            new AuthRequest(
-                                    new String[]{"evernote"}
-                            )
+                            evernoteAuth
                     ).getResponses()[0]
             ); // sandbox for now
             final Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
@@ -44,12 +46,22 @@ public class EvernoteStorage extends StorageFacility {
                 client.createNotebook(RESEARCH_NOTEBOOK);
             }
         } catch (Exception e) { // we'll have to fix this
-            outQueue.put(
-                    new OutMessage(
-                            OutMessage.Type.ERROR,
-                            new ErrorMessage(null, e)
-                    )
-            );
+            Topic t = new Topic("Err topic");
+            t.setArticleCount(-1);
+            if (e instanceof EDAMUserException) {
+                outQueue.put(new OutMessage(OutMessage.Type.DEBUG, "Evernote key invalid"));
+                AuthManager.requestNewAuth(outQueue, evernoteAuth);
+                open(); //dangerous... hopefully no one is dumb enough to blow the stack
+            } else {
+                outQueue.put(
+                        new OutMessage(
+                                OutMessage.Type.ERROR,
+                                new ErrorMessage(
+                                        t, e
+                                )
+                        )
+                );
+            }
         }
         return client != null;
     }

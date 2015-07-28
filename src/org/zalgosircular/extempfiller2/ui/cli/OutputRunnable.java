@@ -41,7 +41,7 @@ class OutputRunnable implements Runnable {
                     case AUTH_REQUEST:
                         AuthRequest authRequest = (AuthRequest) msg.getData();
                         out.println("Requesting authentication data for: ");
-                        for (String authField : authRequest.getAuthFields()) {
+                        for (String authField : authRequest.getRequestFields()) {
                             out.println("\t" + authField);
                         }
                         out.println("Use the auth command to enter the data");
