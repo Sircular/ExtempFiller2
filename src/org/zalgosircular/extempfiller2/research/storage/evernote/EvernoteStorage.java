@@ -34,34 +34,35 @@ public class EvernoteStorage extends StorageFacility {
     @Override
     public boolean open() throws InterruptedException {
         // because of the constructor, it's already open
+        String evernoteKey;
         try {
-            client = new EvernoteClient(EvernoteService.SANDBOX,
-                    AuthManager.requestAuth(
-                            outQueue,
-                            evernoteAuth
-                    ).getResponses()[0]
-            ); // sandbox for now
-            final Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
-            if (HTMLNotebook == null) {
-                client.createNotebook(RESEARCH_NOTEBOOK);
+            evernoteKey = AuthManager.requestAuth(
+                    outQueue,
+                    evernoteAuth
+            ).getResponses()[0];
+            while (client == null) {
+                try {
+                    client = new EvernoteClient(EvernoteService.SANDBOX, evernoteKey); // sandbox for now
+                    final Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
+                    if (HTMLNotebook == null) {
+                        client.createNotebook(RESEARCH_NOTEBOOK);
+                    }
+                } catch (EDAMUserException e) { // we'll have to fix this
+                    outQueue.put(new OutMessage(OutMessage.Type.DEBUG, "Evernote key invalid"));
+                    evernoteKey = AuthManager.requestNewAuth(outQueue, evernoteAuth).getResponses()[0];
+                }
             }
-        } catch (Exception e) { // we'll have to fix this
+        } catch (Exception ex) {
             Topic t = new Topic("Err topic");
             t.setArticleCount(-1);
-            if (e instanceof EDAMUserException) {
-                outQueue.put(new OutMessage(OutMessage.Type.DEBUG, "Evernote key invalid"));
-                AuthManager.requestNewAuth(outQueue, evernoteAuth);
-                open(); //dangerous... hopefully no one is dumb enough to blow the stack
-            } else {
-                outQueue.put(
-                        new OutMessage(
-                                OutMessage.Type.ERROR,
-                                new ErrorMessage(
-                                        t, e
-                                )
-                        )
-                );
-            }
+            outQueue.put(
+                    new OutMessage(
+                            OutMessage.Type.ERROR,
+                            new ErrorMessage(
+                                    t, ex
+                            )
+                    )
+            );
         }
         return client != null;
     }
