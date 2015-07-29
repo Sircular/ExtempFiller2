@@ -63,8 +63,7 @@ public class ResearchWorker implements Runnable {
                         outQueue.put(new OutMessage(OutMessage.Type.RETRIEVED, topics1));
                         break;
                     case RESEARCH:
-                        final String topicStr = (String) msg.getData();
-                        final Topic addTopic = new Topic(topicStr);
+                        final Topic addTopic = (Topic) msg.getData();
                         // check to see if it's been queued for deletion
                         boolean deleted = false;
                         final Iterator<InMessage> mIt = inQueue.iterator();
@@ -82,7 +81,7 @@ public class ResearchWorker implements Runnable {
                         }
 
                         // check to see if it's already been done.
-                        if (storage.exists(topicStr)) {
+                        if (storage.exists(addTopic.getTopic())) {
                             outQueue.put(new OutMessage(OutMessage.Type.ALREADY_RESEARCHED, addTopic));
                             break;
                         }

@@ -154,8 +154,6 @@ class GUIWindow extends JFrame {
         managerPanel.removeTopic(topic);
     }
 
-    public void updateArticleCount(Topic topic) { managerPanel.updateArticleCount(topic); }
-
     public void setTopicState(Topic topic, TopicState state) {
         managerPanel.setTopicState(topic, state);
     }

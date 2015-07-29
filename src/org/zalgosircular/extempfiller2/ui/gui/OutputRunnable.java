@@ -54,7 +54,6 @@ class OutputRunnable implements Runnable {
                         topic = (Topic) msg.getData();
                         addDebugMessage("Finished researching message: " + topic.getTopic());
                         setTopicState(topic, TopicManagerPanel.TopicState.RESEARCHED);
-                        updateArticleCount(topic);
                         break;
                     case DELETING:
                         topic = (Topic) msg.getData();
@@ -111,15 +110,6 @@ class OutputRunnable implements Runnable {
             @Override
             public void run() {
                 window.removeTopic(topic);
-            }
-        });
-    }
-
-    private void updateArticleCount(final Topic topic) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                window.updateArticleCount(topic);
             }
         });
     }
