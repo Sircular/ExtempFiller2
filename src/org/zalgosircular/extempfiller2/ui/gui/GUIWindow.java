@@ -1,5 +1,8 @@
 package org.zalgosircular.extempfiller2.ui.gui;
 
+import org.zalgosircular.extempfiller2.authentication.AuthManager;
+import org.zalgosircular.extempfiller2.authentication.AuthRequest;
+import org.zalgosircular.extempfiller2.authentication.AuthResponse;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel;
@@ -130,6 +133,21 @@ class GUIWindow extends JFrame {
 
     public void setTopics(java.util.List<Topic> topics) {
         managerPanel.setResearchedTopics(topics);
+    }
+
+    public void requestAuth(AuthRequest request){
+        String[] names = request.getRequestFields();
+        String[] keys = new String[names.length];
+        for (int i = 0; i < names.length; i++) {
+            // prompt the user with a dialog
+            String key = "";
+            while (key.length() == 0) {
+                key = (String)JOptionPane.showInputDialog(this, "Please enter key for: "+names[i],
+                        "ExtempFiller2", JOptionPane.PLAIN_MESSAGE);
+            }
+            keys[i] = key;
+        }
+        AuthManager.respondAuth(new AuthResponse(names, keys));
     }
 
     // helper factory methods

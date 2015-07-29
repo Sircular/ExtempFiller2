@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.ui.gui;
 
+import org.zalgosircular.extempfiller2.authentication.AuthRequest;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
@@ -30,6 +31,10 @@ class OutputRunnable implements Runnable {
                 final OutMessage msg = outQueue.take();
                 Topic topic;
                 switch (msg.getMessageType()) {
+                    case AUTH_REQUEST:
+                        addDebugMessage("Requesting auth tokens.");
+                        requestAuth((AuthRequest) msg.getData());
+                        break;
                     case LOADING:
                         addDebugMessage("Loading topics");
                         setWindowEnabled(false);
@@ -132,5 +137,14 @@ class OutputRunnable implements Runnable {
     private void closeWindow() {
         addDebugMessage("Closing ExtempFiller2.");
         window.dispose();
+    }
+
+    private void requestAuth(final AuthRequest request) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                window.requestAuth(request);
+            }
+        });
     }
 }
