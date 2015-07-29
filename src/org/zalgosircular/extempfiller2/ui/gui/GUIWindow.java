@@ -3,8 +3,8 @@ package org.zalgosircular.extempfiller2.ui.gui;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
-import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel;
-import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel.TopicState;
+import org.zalgosircular.extempfiller2.ui.gui.panels.MainPanel;
+import org.zalgosircular.extempfiller2.ui.gui.panels.TopicState;
 import org.zalgosircular.extempfiller2.ui.gui.subwindows.DebugWindow;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ class GUIWindow extends JFrame {
 
     private DebugWindow debugWindow;
     private BlockingQueue<InMessage> inQueue;
-    private TopicManagerPanel managerPanel;
+    private MainPanel managerPanel;
 
     private JMenuBar menuBar;
 
@@ -96,7 +96,7 @@ class GUIWindow extends JFrame {
         menuBar.add(helpMenu);
         this.setJMenuBar(menuBar);
 
-        managerPanel = new TopicManagerPanel(inQueue);
+        managerPanel = new MainPanel(inQueue);
         this.add(managerPanel);
 
         this.pack();

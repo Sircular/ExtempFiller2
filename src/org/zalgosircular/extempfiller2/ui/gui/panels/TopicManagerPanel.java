@@ -146,7 +146,6 @@ public class TopicManagerPanel extends JPanel {
         }
     }
 
-
     public void setResearchedTopics(java.util.List<Topic> topics) {
         final DefaultListModel<TopicListItem> model =
                 (DefaultListModel<TopicListItem>)list.getModel();
@@ -223,14 +222,5 @@ public class TopicManagerPanel extends JPanel {
         public void setState(TopicState state) {
             this.state = state;
         }
-    }
-
-    public enum TopicState {
-        QUEUED_RESEARCH,
-        RESEARCHING,
-        RESEARCHED,
-        QUEUED_DELETION,
-        DELETING,
-        ERROR
     }
 }

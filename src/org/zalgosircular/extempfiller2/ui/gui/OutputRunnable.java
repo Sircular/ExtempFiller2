@@ -3,7 +3,7 @@ package org.zalgosircular.extempfiller2.ui.gui;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
-import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel;
+import org.zalgosircular.extempfiller2.ui.gui.panels.TopicState;
 
 import javax.swing.*;
 import java.util.List;
@@ -48,17 +48,17 @@ class OutputRunnable implements Runnable {
                     case SEARCHING:
                         topic = (Topic) msg.getData();
                         addDebugMessage("Now researching topic: " + topic.getTopic());
-                        setTopicState(topic, TopicManagerPanel.TopicState.RESEARCHING);
+                        setTopicState(topic, TopicState.RESEARCHING);
                         break;
                     case DONE:
                         topic = (Topic) msg.getData();
                         addDebugMessage("Finished researching message: " + topic.getTopic());
-                        setTopicState(topic, TopicManagerPanel.TopicState.RESEARCHED);
+                        setTopicState(topic, TopicState.RESEARCHED);
                         break;
                     case DELETING:
                         topic = (Topic) msg.getData();
                         addDebugMessage("Deleting message: " + topic.getTopic());
-                        setTopicState(topic, TopicManagerPanel.TopicState.DELETING);
+                        setTopicState(topic, TopicState.DELETING);
                         break;
                     case DELETED:
                         topic = (Topic) msg.getData();
@@ -72,7 +72,7 @@ class OutputRunnable implements Runnable {
                             addDebugMessage("Severity: " + error.getSeverity().name());
                             if (error.getSeverity() == ErrorMessage.SEVERITY.CRITICAL ||
                                     error.getSeverity() == ErrorMessage.SEVERITY.ERROR)
-                                setTopicState(error.getTopic(), TopicManagerPanel.TopicState.ERROR);
+                                setTopicState(error.getTopic(), TopicState.ERROR);
                         }
                         showError(error);
                         break;
@@ -114,7 +114,7 @@ class OutputRunnable implements Runnable {
         });
     }
 
-    private void setTopicState(final Topic topic, final TopicManagerPanel.TopicState state) {
+    private void setTopicState(final Topic topic, final TopicState state) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
