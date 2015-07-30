@@ -194,8 +194,9 @@ class GUIWindow extends JFrame {
             while (readScanner.hasNext()) {
                 String topic = readScanner.nextLine();
                 if (!researched.contains(topic)) {
-                    managerPanel.addTopic(new Topic(topic));
-                    inQueue.add(new InMessage(InMessage.Type.RESEARCH, topic));
+                    Topic t = new Topic(topic);
+                    managerPanel.addTopic(t);
+                    inQueue.add(new InMessage(InMessage.Type.RESEARCH, t));
                 }
             }
         }

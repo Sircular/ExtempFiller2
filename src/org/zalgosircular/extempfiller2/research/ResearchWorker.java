@@ -70,7 +70,7 @@ public class ResearchWorker implements Runnable {
                         while (mIt.hasNext() && !deleted) {
                             final InMessage delMsg = mIt.next();
                             if (delMsg.getMessageType() == InMessage.Type.DELETE &&
-                                    ((String) delMsg.getData()).equals(addTopic.getTopic())) {
+                                    delMsg.getData().equals(addTopic.getTopic())) {
                                 deleted = true;
                                 mIt.remove();
                             }
