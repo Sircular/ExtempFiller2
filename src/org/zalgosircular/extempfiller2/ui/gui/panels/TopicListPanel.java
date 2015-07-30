@@ -1,14 +1,12 @@
 package org.zalgosircular.extempfiller2.ui.gui.panels;
 
 import org.zalgosircular.extempfiller2.messaging.InMessage;
-import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -132,7 +130,7 @@ public class TopicListPanel extends JPanel {
     }
 
     public void cancelQueuedTopics() throws InterruptedException {
-        List<TopicListItem> toDelete = new ArrayList<TopicListItem>();
+        List<TopicListItem> toDelete = new LinkedList<TopicListItem>();
         for (TopicListItem item : topicItems) {
             if (item.getTopicState() == TopicState.QUEUED_RESEARCH)
                 toDelete.add(item);
@@ -245,6 +243,7 @@ public class TopicListPanel extends JPanel {
             add(delete, BorderLayout.EAST);
             addMouseListener(clickListener);
             setMinimumSize(new Dimension(MIN_WIDTH, HEIGHT));
+
             setMaximumSize(new Dimension(Integer.MAX_VALUE, HEIGHT));
 
             this.setTopicState(topicState);
