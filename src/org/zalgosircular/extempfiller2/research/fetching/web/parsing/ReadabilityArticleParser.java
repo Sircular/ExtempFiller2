@@ -38,7 +38,10 @@ public class ReadabilityArticleParser extends ArticleParser {
             this.outQueue.put(new OutMessage(OutMessage.Type.DEBUG, String.format(
                     "Could not parse date for page '%s'", url)));
         }
-        final String title = doc.select("title").text();
+        String title = doc.select("title").text();
+        if (title.equals("")) {
+            title = "No title";
+        }
         final String html = doc.select("content").text(); // this also converts HTML entities
 
         return new Article(url, title, author, published, html);
