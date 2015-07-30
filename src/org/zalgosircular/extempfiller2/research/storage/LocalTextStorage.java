@@ -192,6 +192,7 @@ public class LocalTextStorage extends StorageFacility {
                 Files.delete(p);
             }
             Files.delete(Paths.get(folderName));
+            stream.close();
         } catch (IOException e) {
             outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
             return false;
