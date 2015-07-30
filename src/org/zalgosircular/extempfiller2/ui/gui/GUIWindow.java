@@ -65,6 +65,16 @@ class GUIWindow extends JFrame {
                 }
             }
         }));
+        fileMenu.add(createMenuItem("Cancel Queued Topics", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    managerPanel.cancelQueuedTopics();
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }));
         fileMenu.add(createMenuItem("Reload Topics", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

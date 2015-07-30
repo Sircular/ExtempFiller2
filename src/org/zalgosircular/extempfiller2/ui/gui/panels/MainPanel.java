@@ -54,6 +54,8 @@ public class MainPanel extends JPanel {
         topicPanel.setResearchedTopics(topics);
     }
 
+    public void cancelQueuedTopics() throws InterruptedException { topicPanel.cancelQueuedTopics(); }
+
     public List<String> getTopics() {
         final List<Topic> topics = topicPanel.getTopics();
         final List<String> strings = new ArrayList<String>(topics.size());
