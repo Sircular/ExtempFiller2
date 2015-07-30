@@ -26,7 +26,7 @@ public class MainPanel extends JPanel {
 
         // we need to encase it in a scrollpane
         final JScrollPane listPane = new JScrollPane(topicPanel);
-        listPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        listPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         listPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         this.setLayout(new BorderLayout());

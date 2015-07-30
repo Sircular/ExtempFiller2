@@ -172,6 +172,8 @@ public class TopicListPanel extends JPanel {
         private TopicState topicState;
         private final JLabel label;
         private final JButton delete;
+        private static final int MIN_WIDTH = 300;
+        private static final int HEIGHT = 30;
 
         private TopicListItem(Topic topic, TopicState topicState) {
             this.topic = topic;
@@ -183,6 +185,8 @@ public class TopicListPanel extends JPanel {
             add(label, BorderLayout.WEST);
             add(delete, BorderLayout.EAST);
             addMouseListener(clickListener);
+            setMinimumSize(new Dimension(MIN_WIDTH, HEIGHT));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, HEIGHT));
         }
 
         private void setSelected(boolean selected) {
