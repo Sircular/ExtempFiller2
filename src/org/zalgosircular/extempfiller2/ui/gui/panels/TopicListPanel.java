@@ -156,6 +156,14 @@ public class TopicListPanel extends JPanel {
         }
     }
 
+    @Override
+    public void setEnabled(boolean value) {
+        super.setEnabled(value);
+        for (TopicListItem item : topicItems) {
+            item.setEnabled(value);
+        }
+    }
+
     private class DeleteKeyBind extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -174,8 +182,6 @@ public class TopicListPanel extends JPanel {
             return "DELETE";
         }
     }
-
-    ;
 
     private class TopicListItem extends JPanel {
         private static final int MIN_WIDTH = 300;
@@ -254,13 +260,15 @@ public class TopicListPanel extends JPanel {
         }
 
         private void setSelected(boolean selected) {
-            this.selected = selected;
-            if (selected) {
-                setBackground(UIManager.getColor("List.selectionBackground"));
-                setForeground(UIManager.getColor("List.selectionForeground"));
-            } else {
-                setBackground(UIManager.getColor("List.background"));
-                setForeground(UIManager.getColor("List.foreground"));
+            if (isEnabled()) { // no sense in allowing selections
+                this.selected = selected;
+                if (selected) {
+                    setBackground(UIManager.getColor("List.selectionBackground"));
+                    setForeground(UIManager.getColor("List.selectionForeground"));
+                } else {
+                    setBackground(UIManager.getColor("List.background"));
+                    setForeground(UIManager.getColor("List.foreground"));
+                }
             }
         }
 
@@ -340,6 +348,12 @@ public class TopicListPanel extends JPanel {
             });
             button.setVisible(false); // we'll make it show up when it's useful
             return button;
+        }
+
+        @Override
+        public void setEnabled(boolean value) {
+            delete.setEnabled(value);
+            label.setEnabled(value);
         }
     }
 
