@@ -16,7 +16,7 @@ import java.util.concurrent.BlockingQueue;
 public class MainPanel extends JPanel {
     private final BlockingQueue<InMessage> inQueue;
     private final TopicListPanel topicPanel;
-    private final AddTopicPanel2 addTopicPanel;
+    private final AddTopicPanel addTopicPanel;
 
     public MainPanel(BlockingQueue<InMessage> inQueue) {
         this.inQueue = inQueue;
@@ -33,7 +33,7 @@ public class MainPanel extends JPanel {
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.add(listPane, BorderLayout.CENTER);
 
-        addTopicPanel = new AddTopicPanel2(this, inQueue);
+        addTopicPanel = new AddTopicPanel(this, inQueue);
         addTopicPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
         this.add(addTopicPanel, BorderLayout.SOUTH);
     }
