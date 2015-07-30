@@ -93,7 +93,7 @@ public class EvernoteStorage extends StorageFacility {
     @Override
     public List<Topic> loadResearched() throws InterruptedException {
         try {
-            final Collection<Map.Entry<String, Tag>> names = client.getFullyNamedTags();
+            final Collection<Map.Entry<String, Tag>> names = client.getFullyNamedTags(false);
             final List<Topic> topics = new LinkedList<Topic>();
             for (Map.Entry<String, Tag> entry : names) {
                 Topic t = new Topic(entry.getKey());

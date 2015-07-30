@@ -65,7 +65,6 @@ public class EvernoteClient {
 
         // Start api request timing
         checkRateTimer();
-        loadTagCache();
     }
 
     /**
@@ -226,11 +225,15 @@ public class EvernoteClient {
      * @return A List of the desired names of created tags based on the tags notebook
      * @throws Exception
      */
-    public Collection<Map.Entry<String, Tag>> getFullyNamedTags() throws Exception {
-        if (tagCache != null && tagCache.size() != 0) {
+    public Collection<Map.Entry<String, Tag>> getFullyNamedTags(boolean cached) throws Exception {
+        if (cached && tagCache != null && tagCache.size() != 0) {
             return tagCache.entrySet();
         }
         final LinkedList<Map.Entry<String, Tag>> tags = new LinkedList<Map.Entry<String, Tag>>();
+        if (getNotebook("Tag Names") == null) {
+            //    logger.info("Creating Tag Names Notebook");
+            createNotebook("Tag Names");
+        }
         final Notebook tagNotebook = getNotebook("Tag Names");
         final List<Note> notedTags = getNotesInNotebook(tagNotebook, 10000);
         String content;
@@ -261,6 +264,8 @@ public class EvernoteClient {
             }
             tags.add(new AbstractMap.SimpleEntry<String, Tag>(content, tag));
         }
+
+        setTagCache(tags);
         return tags;
     }
 
@@ -277,7 +282,7 @@ public class EvernoteClient {
             name = name.substring(0, 99).trim();
         if (name.contains(","))
             name = name.replace(",", "");
-        if (tagCache.containsKey(name)) {
+        if (tagCache != null && tagCache.containsKey(name)) {
             return tagCache.get(name);
         }
         for (final Tag tag : getTags()) {
@@ -490,11 +495,13 @@ public class EvernoteClient {
         noteStore.expungeTag(tag.getGuid());
         //Not the most efficient way of going about this but it works
         //Sticking with hashmap because inserts should happen way more often
-        for (Iterator<Map.Entry<String, Tag>> iterator = tagCache.entrySet().iterator(); iterator.hasNext(); ) {
-            Map.Entry<String, Tag> entry = iterator.next();
-            if (entry.getValue().equals(tag)) {
-                iterator.remove();
-                break;
+        if (tagCache != null) {
+            for (Iterator<Map.Entry<String, Tag>> iterator = tagCache.entrySet().iterator(); iterator.hasNext(); ) {
+                Map.Entry<String, Tag> entry = iterator.next();
+                if (entry.getValue().equals(tag)) {
+                    iterator.remove();
+                    break;
+                }
             }
         }
     }
@@ -522,19 +529,9 @@ public class EvernoteClient {
     }
 
     /**
-     * Creates the tag notebook, and checks the notebook against tags on the server
-     *
-     * @throws Exception All exceptions are thrown to the calling program
+     * Sets the fully named tag cache
      */
-    private void loadTagCache() throws Exception {
-        //logger.info("Validating Tags Notebook");
-        if (getNotebook("Tag Names") == null) {
-            //    logger.info("Creating Tag Names Notebook");
-            createNotebook("Tag Names");
-        }
-        Collection<Map.Entry<String, Tag>> tags = getFullyNamedTags();
-
-        //convert list to hashmap for performance
+    private void setTagCache(Collection<Map.Entry<String, Tag>> tags) {
         tagCache = new HashMap<String, Tag>(tags.size());
         for (Map.Entry<String, Tag> tag : tags) {
             tagCache.put(tag.getKey(), tag.getValue());
