@@ -262,28 +262,12 @@ public class TopicListPanel extends JPanel {
 
         public void setTopicState(TopicState topicState) {
             this.topicState = topicState;
-            label.setText(getLabel());
-            // modify the "delete" or "cancel" button
-            switch (topicState) {
-                case RESEARCHED:
-                    delete.setText("Delete");
-                    delete.setVisible(true);
-                    delete.setEnabled(true);
-                    break;
-                case QUEUED_RESEARCH:
-                    delete.setText("Cancel");
-                    delete.setVisible(true);
-                    delete.setEnabled(true);
-                    break;
-                default:
-                    delete.setVisible(false);
-                    delete.setEnabled(false);
-                    break;
-            }
+            updateLabel();
+            updateButton();
             revalidate();
         }
 
-        private String getLabel() {
+        private void updateLabel() {
             String stateStr;
             switch (topicState) {
                 case QUEUED_RESEARCH:
@@ -308,7 +292,26 @@ public class TopicListPanel extends JPanel {
                     stateStr = "[?]";
                     break;
             }
-            return String.format("%s %s", stateStr, topic.getTopic());
+            label.setText(String.format("%s %s", stateStr, topic.getTopic()));
+        }
+
+        private void updateButton() {
+            switch (topicState) {
+                case RESEARCHED:
+                    delete.setText("Delete");
+                    delete.setVisible(true);
+                    delete.setEnabled(true);
+                    break;
+                case QUEUED_RESEARCH:
+                    delete.setText("Cancel");
+                    delete.setVisible(true);
+                    delete.setEnabled(true);
+                    break;
+                default:
+                    delete.setVisible(false);
+                    delete.setEnabled(false);
+                    break;
+            }
         }
 
         private JButton createDeleteButton() {
