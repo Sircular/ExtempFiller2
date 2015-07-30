@@ -57,6 +57,7 @@ public class ReadabilityArticleFetcher extends ArticleFetcher {
                             OutMessage.Type.ERROR,
                             new ErrorMessage(
                                     topic,
+                                    ErrorMessage.SEVERITY.CRITICAL,
                                     new RuntimeException("No articles found")
                             )
                     )

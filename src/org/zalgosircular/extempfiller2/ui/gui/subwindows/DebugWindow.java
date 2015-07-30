@@ -2,6 +2,7 @@ package org.zalgosircular.extempfiller2.ui.gui.subwindows;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -64,7 +65,9 @@ public class DebugWindow extends JFrame {
 
         area = new JTextArea();
         area.setEditable(false);
-        area.setAutoscrolls(true);
+        // set up autoscroll for the JScrollPAne
+        DefaultCaret caret = (DefaultCaret)area.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
         // create a scroll pane
         final JScrollPane scrollPane = new JScrollPane(area);

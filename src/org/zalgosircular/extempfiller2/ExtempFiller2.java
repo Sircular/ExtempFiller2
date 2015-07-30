@@ -10,6 +10,7 @@ import org.zalgosircular.extempfiller2.research.formatting.ENMLFormatter;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
 import org.zalgosircular.extempfiller2.research.storage.evernote.EvernoteStorage;
 import org.zalgosircular.extempfiller2.ui.cli.CLI;
+import org.zalgosircular.extempfiller2.ui.gui.GUI;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -28,7 +29,32 @@ public class ExtempFiller2 {
         worker.getThread().start();
 
         // initialize the UI
+        if (args.length > 0) {
+            if (args[0].equalsIgnoreCase("gui")) {
+                runGUI(inQueue, outQueue);
+            } else if (args[0].equalsIgnoreCase("cli")) {
+                runCLI(inQueue, outQueue);
+            } else {
+                // output a debug message
+                System.out.println(String.format("Unrecognized parameter: %s.\n", args[0])+
+                "Recognized options: gui, cli.\n"+
+                "Initializing GUI (default.)");
+                runGUI(inQueue, outQueue);
+            }
+        } else {
+            runGUI(inQueue, outQueue);
+        }
+    }
+
+    private static void runCLI(BlockingQueue<InMessage> inQueue,
+                               BlockingQueue<OutMessage> outQueue) {
         CLI cli = new CLI(inQueue, outQueue);
         cli.start();
+    }
+
+    private static void runGUI(BlockingQueue<InMessage> inQueue,
+                               BlockingQueue<OutMessage> outQueue) {
+        GUI gui = new GUI(inQueue, outQueue);
+        gui.start();
     }
 }

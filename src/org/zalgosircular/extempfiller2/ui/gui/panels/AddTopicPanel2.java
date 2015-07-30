@@ -15,13 +15,13 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by Logan Lembke on 7/25/2015.
  */
-public class AddTopicPanel extends JPanel {
-    private final TopicManagerPanel manager;
+public class AddTopicPanel2 extends JPanel {
+    private final MainPanel manager;
     private final BlockingQueue<InMessage> inQueue;
     private final JButton addButton;
     private final JTextField addField;
 
-    public AddTopicPanel(TopicManagerPanel manager, BlockingQueue<InMessage> inQueue) {
+    public AddTopicPanel2(MainPanel manager, BlockingQueue<InMessage> inQueue) {
         this.manager = manager;
         this.inQueue = inQueue;
 

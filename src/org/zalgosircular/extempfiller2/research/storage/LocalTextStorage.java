@@ -8,6 +8,7 @@ import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -43,7 +44,7 @@ public class LocalTextStorage extends StorageFacility {
                 Files.createFile(Paths.get(TOPICS_FILE));
             }
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
         }
         return true;
@@ -51,22 +52,10 @@ public class LocalTextStorage extends StorageFacility {
 
     @Override
     public boolean close() throws InterruptedException {
-        final StringBuilder sb = new StringBuilder();
-        final String endl = System.getProperty("line.separator");
-        for (Topic t : topics) {
-            sb.append(t.getTopic());
-            sb.append(SEP);
-            sb.append(shortened.get(t));
-            sb.append(SEP);
-            sb.append(t.getArticleCount());
-            sb.append(endl);
-        }
-        final String cache = sb.toString();
         try {
-            Files.write(Paths.get(TOPICS_FILE), cache.getBytes("utf-8"),
-                    StandardOpenOption.TRUNCATE_EXISTING);
+            saveCache();
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
         }
         return true;
@@ -108,7 +97,7 @@ public class LocalTextStorage extends StorageFacility {
                 shortened.put(t, folderName);
             }
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, ErrorMessage.SEVERITY.ERROR, e)));
             return null;
         }
         loaded = true;
@@ -162,8 +151,19 @@ public class LocalTextStorage extends StorageFacility {
             Files.write(Paths.get(fileName), text.getBytes("utf-8"),
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
+        }
+        try {
+            // this might seem a little expensive to be doing every
+            // time that an article is saved, but it's the only way
+            // to make sure that the cache is up to date if we choose
+            // to reload
+            saveCache();
+        } catch (IOException e) {
+            // saving the article worked properly, but saving the cache didn't
+            // we can still return true, but also pass up the error
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
         }
         return true;
     }
@@ -194,9 +194,34 @@ public class LocalTextStorage extends StorageFacility {
             Files.delete(Paths.get(folderName));
             stream.close();
         } catch (IOException e) {
-            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, e)));
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
             return false;
         }
+        try {
+            saveCache();
+        } catch (IOException e) {
+            outQueue.put(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(topic, ErrorMessage.SEVERITY.ERROR, e)));
+        }
         return true;
+    }
+
+    private void saveCache() throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        final String endl = System.getProperty("line.separator");
+        for (Topic t : topics) {
+            sb.append(t.getTopic());
+            sb.append(SEP);
+            sb.append(shortened.get(t));
+            sb.append(SEP);
+            sb.append(t.getArticleCount());
+            sb.append(endl);
+        }
+        final String cache = sb.toString();
+        try {
+            Files.write(Paths.get(TOPICS_FILE), cache.getBytes("utf-8"),
+                    StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (UnsupportedEncodingException e) {
+            // will not happen
+        }
     }
 }

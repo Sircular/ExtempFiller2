@@ -4,17 +4,22 @@ import org.zalgosircular.extempfiller2.authentication.AuthManager;
 import org.zalgosircular.extempfiller2.authentication.AuthRequest;
 import org.zalgosircular.extempfiller2.authentication.AuthResponse;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
+import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
-import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel;
-import org.zalgosircular.extempfiller2.ui.gui.panels.TopicManagerPanel.TopicState;
+import org.zalgosircular.extempfiller2.ui.gui.panels.MainPanel;
+import org.zalgosircular.extempfiller2.ui.gui.panels.TopicState;
 import org.zalgosircular.extempfiller2.ui.gui.subwindows.DebugWindow;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -24,7 +29,7 @@ class GUIWindow extends JFrame {
 
     private DebugWindow debugWindow;
     private BlockingQueue<InMessage> inQueue;
-    private TopicManagerPanel managerPanel;
+    private MainPanel managerPanel;
 
     private JMenuBar menuBar;
 
@@ -53,6 +58,34 @@ class GUIWindow extends JFrame {
         // set up the menu
         menuBar = new JMenuBar();
         final JMenu fileMenu = new JMenu("File");
+        fileMenu.add(createMenuItem("Load Topics From File", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    loadTopicsFromFile();
+                } catch (IOException e1) {
+                    outputError(e1);
+                }
+            }
+        }));
+        fileMenu.add(createMenuItem("Cancel Queued Topics", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    managerPanel.cancelQueuedTopics();
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }));
+        fileMenu.add(createMenuItem("Reload Topics", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                inQueue.add(new InMessage(InMessage.Type.LOAD, null));
+                setEnabled(false);
+            }
+        }));
+        fileMenu.addSeparator();
         fileMenu.add(createMenuItem("Close", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -76,7 +109,7 @@ class GUIWindow extends JFrame {
         menuBar.add(helpMenu);
         this.setJMenuBar(menuBar);
 
-        managerPanel = new TopicManagerPanel(inQueue);
+        managerPanel = new MainPanel(inQueue);
         this.add(managerPanel);
 
         this.pack();
@@ -111,16 +144,23 @@ class GUIWindow extends JFrame {
         debugWindow.addDebugMessage(msg);
     }
 
-    public void showError(Throwable exception) {
+    public void showError(ErrorMessage msg) {
+        outputError(msg.getException());
+
+        //Quite annoying, but useful
+        if (msg.getSeverity() == ErrorMessage.SEVERITY.ERROR ||
+                msg.getSeverity() == ErrorMessage.SEVERITY.CRITICAL)
+            // todo: add intelligent error messages
+            JOptionPane.showMessageDialog(this, msg.getException().getMessage());
+    }
+
+    public void outputError(Throwable exception) {
         addDebugMessage(exception.toString());
 
         //Copied from throwable.java
         StackTraceElement[] trace = exception.getStackTrace();
         for (StackTraceElement traceElement : trace)
             addDebugMessage("\tat " + traceElement);
-
-        //Quite annoying
-        //JOptionPane.showMessageDialog(this, exception.toString());
     }
 
     public void removeTopic(Topic topic) {
@@ -155,5 +195,38 @@ class GUIWindow extends JFrame {
         JMenuItem item = new JMenuItem(name);
         item.addActionListener(listener);
         return item;
+    }
+
+    private void loadTopicsFromFile() throws IOException {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("ExtempFiller2");
+        chooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() ||
+                        f.getName().toLowerCase().endsWith(".txt");
+            }
+
+            @Override
+            public String getDescription() {
+                return "Text Files";
+            }
+        });
+        int response = chooser.showOpenDialog(this);
+        if (response == JFileChooser.APPROVE_OPTION) {
+            // get everything currently researched
+            java.util.List<String> researched = managerPanel.getTopics();
+            // load everything from file
+            File file = chooser.getSelectedFile();
+            Scanner readScanner = new Scanner(file);
+            while (readScanner.hasNext()) {
+                String topic = readScanner.nextLine();
+                if (!researched.contains(topic)) {
+                    Topic t = new Topic(topic);
+                    managerPanel.addTopic(t);
+                    inQueue.add(new InMessage(InMessage.Type.RESEARCH, t));
+                }
+            }
+        }
     }
 }

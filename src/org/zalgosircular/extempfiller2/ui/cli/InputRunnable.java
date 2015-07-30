@@ -3,6 +3,7 @@ package org.zalgosircular.extempfiller2.ui.cli;
 import org.zalgosircular.extempfiller2.authentication.AuthManager;
 import org.zalgosircular.extempfiller2.authentication.AuthResponse;
 import org.zalgosircular.extempfiller2.messaging.InMessage;
+import org.zalgosircular.extempfiller2.research.Topic;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -91,7 +92,8 @@ class InputRunnable implements Runnable {
                 sb.append(' ');
                 sb.append(words[i]);
             }
-            inQueue.put(new InMessage(InMessage.Type.RESEARCH, sb.toString()));
+            final Topic t = new Topic(sb.toString());
+            inQueue.put(new InMessage(InMessage.Type.RESEARCH, t));
         } else {
             System.err.println("Syntax: research <topic>");
         }

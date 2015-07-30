@@ -8,6 +8,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -68,9 +70,33 @@ public class TopicManagerPanel extends JPanel {
     private void deleteSelectedTopics() throws InterruptedException {
         final int[] selected = list.getSelectedIndices();
         final DefaultListModel<TopicListItem> model = (DefaultListModel<TopicListItem>) list.getModel();
+        final java.util.List<Topic> toRemove = new ArrayList<Topic>();
+        boolean invalid = false;
+
         for (int i : selected) {
-            setTopicState(i, TopicState.QUEUED_DELETION);
-            inQueue.put(new InMessage(InMessage.Type.DELETE, model.get(i).getTopic().getTopic()));
+            final TopicListItem item = model.get(i);
+            switch (item.getState()) {
+                case RESEARCHED:
+                    setTopicState(item.getTopic(), TopicState.DELETING);
+                    inQueue.put(new InMessage(InMessage.Type.DELETE, item.getTopic().getTopic()));
+                    break;
+                case QUEUED_RESEARCH:
+                    toRemove.add(item.getTopic());
+                    break;
+                default:
+                    invalid = true;
+                    break;
+            }
+        }
+        for (Topic t : toRemove) {
+            removeTopic(t);
+            // to negate the previous message sent
+            inQueue.put(new InMessage(InMessage.Type.DELETE, t.getTopic()));
+        }
+        // todo: make the GUIWindow show this instead
+        if (invalid) {
+            JOptionPane.showMessageDialog(this, "Please wait until the current operation is finished.",
+                    "ExtempFiller2", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -120,15 +146,26 @@ public class TopicManagerPanel extends JPanel {
         }
     }
 
-
     public void setResearchedTopics(java.util.List<Topic> topics) {
         final DefaultListModel<TopicListItem> model =
                 (DefaultListModel<TopicListItem>)list.getModel();
+        model.clear();
         for (Topic topic : topics) {
             TopicListItem item = new TopicListItem(topic, TopicState.RESEARCHED);
             model.addElement(item);
         }
         list.revalidate();
+    }
+
+    // used to check for duplicates
+    public java.util.List<String> getTopics() {
+        final java.util.List<String> topics = new LinkedList<String>();
+        final DefaultListModel<TopicListItem> model =
+                (DefaultListModel<TopicListItem>)list.getModel();
+        for (int i = 0; i < model.size(); i++) {
+            topics.add(model.get(i).getTopic().getTopic());
+        }
+        return topics;
     }
 
     public void setEnabled(boolean value) {
@@ -150,28 +187,28 @@ public class TopicManagerPanel extends JPanel {
             String stateStr;
             switch (getState()) {
                 case QUEUED_RESEARCH:
-                    stateStr = "Queued for Research";
+                    stateStr = "[Queued for Research]";
                     break;
                 case RESEARCHING:
-                    stateStr = "Researching";
+                    stateStr = "[Researching]";
                     break;
                 case RESEARCHED:
-                    stateStr = "Researched";
+                    stateStr = "[Researched]["+getTopic().getArticleCount()+"]";
                     break;
                 case QUEUED_DELETION:
-                    stateStr = "Queued for Deletion";
+                    stateStr = "[Queued for Deletion]";
                     break;
                 case DELETING:
-                    stateStr = "Deleting";
+                    stateStr = "[Deleting]";
                     break;
                 case ERROR:
-                    stateStr = "Research Error";
+                    stateStr = "[Research Error]";
                     break;
                 default:
-                    stateStr = "?";
+                    stateStr = "[?]";
                     break;
             }
-            return String.format("[%s] %s", stateStr, topic.getTopic());
+            return String.format("%s %s", stateStr, topic.getTopic());
         }
 
         public Topic getTopic() {
@@ -185,14 +222,5 @@ public class TopicManagerPanel extends JPanel {
         public void setState(TopicState state) {
             this.state = state;
         }
-    }
-
-    public enum TopicState {
-        QUEUED_RESEARCH,
-        RESEARCHING,
-        RESEARCHED,
-        QUEUED_DELETION,
-        DELETING,
-        ERROR
     }
 }

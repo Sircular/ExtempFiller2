@@ -68,15 +68,14 @@ public class ResearchWorker implements Runnable {
                         outQueue.put(new OutMessage(OutMessage.Type.RETRIEVED, topics1));
                         break;
                     case RESEARCH:
-                        final String topicStr = (String) msg.getData();
-                        final Topic addTopic = new Topic(topicStr);
+                        final Topic addTopic = (Topic) msg.getData();
                         // check to see if it's been queued for deletion
                         boolean deleted = false;
                         final Iterator<InMessage> mIt = inQueue.iterator();
                         while (mIt.hasNext() && !deleted) {
                             final InMessage delMsg = mIt.next();
                             if (delMsg.getMessageType() == InMessage.Type.DELETE &&
-                                    ((Topic) delMsg.getData()).equals(addTopic)) {
+                                    delMsg.getData().equals(addTopic.getTopic())) {
                                 deleted = true;
                                 mIt.remove();
                             }
@@ -87,7 +86,7 @@ public class ResearchWorker implements Runnable {
                         }
 
                         // check to see if it's already been done.
-                        if (storage.exists(topicStr)) {
+                        if (storage.exists(addTopic.getTopic())) {
                             outQueue.put(new OutMessage(OutMessage.Type.ALREADY_RESEARCHED, addTopic));
                             break;
                         }
@@ -98,15 +97,25 @@ public class ResearchWorker implements Runnable {
                             outQueue.put(new OutMessage(OutMessage.Type.SAVING, addTopic));
 
                             for (Article article : articles) {
+                                // we increment it here because the storage
+                                // may save the cache each time an article is
+                                // saved. we decrement if it is unsuccessful to
+                                // ensure that the count is correct.
+                                addTopic.setArticleCount(addTopic.getArticleCount() + 1);
                                 if (storage.save(addTopic, article)) {
                                     outQueue.put(new OutMessage(
                                             OutMessage.Type.SAVED,
                                             new SavedMessage(article, addTopic)
                                     ));
-                                    addTopic.setArticleCount(addTopic.getArticleCount() + 1);
+                                } else {
+                                    // if it doesn't work, the storage has already
+                                    // sent up an error message
+                                    // decrement to keep the article count correct
+                                    // (we assumed it would work and incremented
+                                    // accordingly above)
+                                    addTopic.setArticleCount(addTopic.getArticleCount() - 1);
                                 }
-                                // if it doesn't work, the storage has already
-                                // sent up an error message
+
                             }
                         }
                         outQueue.put(new OutMessage(OutMessage.Type.DONE, addTopic));
@@ -127,6 +136,7 @@ public class ResearchWorker implements Runnable {
                                             OutMessage.Type.ERROR,
                                             new ErrorMessage(
                                                     erredTopic,
+                                                    ErrorMessage.SEVERITY.ERROR,
                                                     e
                                             )
                                     )
