@@ -75,7 +75,7 @@ public class TopicListPanel extends JPanel {
     private void deleteTopic(TopicListItem tli) throws InterruptedException {
         switch (tli.getTopicState()) {
             case RESEARCHED:
-                tli.setTopicState(TopicState.DELETING);
+                tli.setTopicState(TopicState.QUEUED_DELETION);
                 inQueue.put(new InMessage(InMessage.Type.DELETE, tli.getTopic().getTopic()));
                 break;
             case QUEUED_RESEARCH:
@@ -167,100 +167,13 @@ public class TopicListPanel extends JPanel {
     ;
 
     private class TopicListItem extends JPanel {
-        private boolean selected;
-        private final Topic topic;
-        private TopicState topicState;
-        private final JLabel label;
-        private final JButton delete;
         private static final int MIN_WIDTH = 300;
         private static final int HEIGHT = 30;
-
-        private TopicListItem(Topic topic, TopicState topicState) {
-            this.topic = topic;
-            this.topicState = topicState;
-            setSelected(false);
-            label = new JLabel(getLabel());
-            delete = getDeleteButton();
-            setLayout(new BorderLayout());
-            add(label, BorderLayout.WEST);
-            add(delete, BorderLayout.EAST);
-            addMouseListener(clickListener);
-            setMinimumSize(new Dimension(MIN_WIDTH, HEIGHT));
-            setMaximumSize(new Dimension(Integer.MAX_VALUE, HEIGHT));
-        }
-
-        private void setSelected(boolean selected) {
-            this.selected = selected;
-            if (selected) {
-                setBackground(UIManager.getColor("List.selectionBackground"));
-                setForeground(UIManager.getColor("List.selectionForeground"));
-            } else {
-                setBackground(UIManager.getColor("List.background"));
-                setForeground(UIManager.getColor("List.foreground"));
-            }
-        }
-
-        public boolean isSelected() {
-            return selected;
-        }
-
-        public Topic getTopic() {
-            return topic;
-        }
-
-        public void setTopicState(TopicState topicState) {
-            this.topicState = topicState;
-            label.setText(getLabel());
-            revalidate();
-        }
-
-        public TopicState getTopicState() {
-            return topicState;
-        }
-
-        private String getLabel() {
-            String stateStr;
-            switch (topicState) {
-                case QUEUED_RESEARCH:
-                    stateStr = "[Queued for Research]";
-                    break;
-                case RESEARCHING:
-                    stateStr = "[Researching]";
-                    break;
-                case RESEARCHED:
-                    stateStr = "[Researched][" + topic.getArticleCount() + "]";
-                    break;
-                case QUEUED_DELETION:
-                    stateStr = "[Queued for Deletion]";
-                    break;
-                case DELETING:
-                    stateStr = "[Deleting]";
-                    break;
-                case ERROR:
-                    stateStr = "[Research Error]";
-                    break;
-                default:
-                    stateStr = "[?]";
-                    break;
-            }
-            return String.format("%s %s", stateStr, topic.getTopic());
-        }
-
-        private JButton getDeleteButton() {
-            final JButton button = new JButton("Delete");
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        deleteTopic(((TopicListItem) ((JButton) e.getSource()).getParent()));
-                    } catch (InterruptedException e1) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-            });
-            return button;
-        }
-
+        private final Topic topic;
+        private final JLabel label;
+        private final JButton delete;
+        private boolean selected;
+        private TopicState topicState;
         private MouseListener clickListener = new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -308,6 +221,111 @@ public class TopicListPanel extends JPanel {
 
             }
         };
+
+        private TopicListItem(Topic topic, TopicState topicState) {
+            this.topic = topic;
+            setSelected(false);
+            label = new JLabel();
+            delete = createDeleteButton();
+            setLayout(new BorderLayout());
+            add(label, BorderLayout.WEST);
+            add(delete, BorderLayout.EAST);
+            addMouseListener(clickListener);
+            setMinimumSize(new Dimension(MIN_WIDTH, HEIGHT));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, HEIGHT));
+
+            this.setTopicState(topicState);
+        }
+
+        public boolean isSelected() {
+            return selected;
+        }
+
+        private void setSelected(boolean selected) {
+            this.selected = selected;
+            if (selected) {
+                setBackground(UIManager.getColor("List.selectionBackground"));
+                setForeground(UIManager.getColor("List.selectionForeground"));
+            } else {
+                setBackground(UIManager.getColor("List.background"));
+                setForeground(UIManager.getColor("List.foreground"));
+            }
+        }
+
+        public Topic getTopic() {
+            return topic;
+        }
+
+        public TopicState getTopicState() {
+            return topicState;
+        }
+
+        public void setTopicState(TopicState topicState) {
+            this.topicState = topicState;
+            label.setText(getLabel());
+            // modify the "delete" or "cancel" button
+            switch (topicState) {
+                case RESEARCHED:
+                    delete.setText("Delete");
+                    delete.setVisible(true);
+                    delete.setEnabled(true);
+                    break;
+                case QUEUED_RESEARCH:
+                    delete.setText("Cancel");
+                    delete.setVisible(true);
+                    delete.setEnabled(true);
+                    break;
+                default:
+                    delete.setVisible(false);
+                    delete.setEnabled(false);
+                    break;
+            }
+            revalidate();
+        }
+
+        private String getLabel() {
+            String stateStr;
+            switch (topicState) {
+                case QUEUED_RESEARCH:
+                    stateStr = "[Queued for Research]";
+                    break;
+                case RESEARCHING:
+                    stateStr = "[Researching]";
+                    break;
+                case RESEARCHED:
+                    stateStr = "[Researched][" + topic.getArticleCount() + "]";
+                    break;
+                case QUEUED_DELETION:
+                    stateStr = "[Queued for Deletion]";
+                    break;
+                case DELETING:
+                    stateStr = "[Deleting]";
+                    break;
+                case ERROR:
+                    stateStr = "[Research Error]";
+                    break;
+                default:
+                    stateStr = "[?]";
+                    break;
+            }
+            return String.format("%s %s", stateStr, topic.getTopic());
+        }
+
+        private JButton createDeleteButton() {
+            final JButton button = new JButton("Delete");
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        deleteTopic(((TopicListItem) ((JButton) e.getSource()).getParent()));
+                    } catch (InterruptedException e1) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            });
+            button.setVisible(false); // we'll make it show up when it's useful
+            return button;
+        }
     }
 
 }
