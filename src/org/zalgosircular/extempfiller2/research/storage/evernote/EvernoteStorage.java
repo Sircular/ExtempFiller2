@@ -20,12 +20,12 @@ import java.util.concurrent.BlockingQueue;
  * Created by Logan Lembke on 7/8/2015.
  */
 public class EvernoteStorage extends StorageFacility {
-    private EvernoteClient client;
     private static final String RESEARCH_NOTEBOOK = "Web Notes";
-    private List<Topic> topicCache = null;
     private static final AuthRequest evernoteAuth = new AuthRequest(
             new String[]{"evernote"}
     );
+    private EvernoteClient client;
+    private List<Topic> topicCache = null;
 
     public EvernoteStorage(BlockingQueue<OutMessage> outQueue, ENMLFormatter formatter) {
         super(outQueue, formatter);
@@ -41,7 +41,7 @@ public class EvernoteStorage extends StorageFacility {
             ).getResponses()[0];
             while (client == null) {
                 try {
-                    client = new EvernoteClient(EvernoteService.SANDBOX, evernoteKey); // sandbox for now
+                    client = new EvernoteClient(EvernoteService.PRODUCTION, evernoteKey);
                     final Notebook HTMLNotebook = client.getNotebook(RESEARCH_NOTEBOOK);
                     if (HTMLNotebook == null) {
                         client.createNotebook(RESEARCH_NOTEBOOK);
