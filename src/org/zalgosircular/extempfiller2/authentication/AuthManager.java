@@ -35,8 +35,6 @@ public class AuthManager {
                 keyMap.put(tokens[0], tokens[1]);
             }
             keyScanner.close();
-        } else {
-            throw new RuntimeException(FILENAME + " doesn't exist");
         }
     }
 
