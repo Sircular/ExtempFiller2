@@ -43,22 +43,17 @@ public class AuthManager {
     // set a timer (eugh)
     private static void saveMap() throws IOException {
         Path path = Paths.get(FILENAME);
-        if (Files.exists(path)) {
-            StringBuilder output = new StringBuilder();
-            synchronized (keyMap) {
-                for (String name : keyMap.keySet()) {
-                    output.append(name);
-                    output.append(SEP);
-                    output.append(keyMap.get(name));
-                    output.append('\n');
-                }
+        StringBuilder output = new StringBuilder();
+        synchronized (keyMap) {
+            for (String name : keyMap.keySet()) {
+                output.append(name);
+                output.append(SEP);
+                output.append(keyMap.get(name));
+                output.append('\n');
             }
-
-            Files.write(path, output.toString().getBytes(),
-                    StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-        } else {
-            throw new RuntimeException(FILENAME + " doesn't exist");
         }
+        Files.write(path, output.toString().getBytes(),
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     public static AuthResponse requestAuth(BlockingQueue<OutMessage> outQueue, AuthRequest request) throws InterruptedException {
