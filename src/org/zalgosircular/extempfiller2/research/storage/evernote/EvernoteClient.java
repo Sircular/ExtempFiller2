@@ -26,19 +26,14 @@ import java.util.*;
 public class EvernoteClient {
 
     private static final int MAX_RETRIES = 15;
-
-    // Used for Authentication
-    private UserStoreClient userStore;
-
-    // Used for interacting with user data
-    private NoteStoreClient noteStore;
-
-    // Used for timing api requests
-    private long rateTimer = 0;
-
     // How long to wait between each api request in milliseconds
     private static final int TIMER = 1000;
-
+    // Used for Authentication
+    private UserStoreClient userStore;
+    // Used for interacting with user data
+    private NoteStoreClient noteStore;
+    // Used for timing api requests
+    private long rateTimer = 0;
     // basic caching so that we don't overload it with tag requests
     private Map<String, Tag> tagCache;
 
@@ -546,7 +541,7 @@ public class EvernoteClient {
     private void checkRateTimer() throws InterruptedException {
         if (System.currentTimeMillis() < rateTimer + TIMER)
             Thread.sleep(rateTimer + TIMER - System.currentTimeMillis());
-        rateTimer = Calendar.getInstance().getTimeInMillis();
+        rateTimer = System.currentTimeMillis();
     }
 }
 
