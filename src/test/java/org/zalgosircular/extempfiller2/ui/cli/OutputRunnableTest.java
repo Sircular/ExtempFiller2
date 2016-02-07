@@ -15,12 +15,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class OutputRunnableTest {
+    private static final String endl = System.getProperty("line.separator");
     private ArrayBlockingQueue<OutMessage> outQueue;
     private OutputRunnable outputRunnable;
     private Thread thread;
     private ByteArrayOutputStream mockOutput;
     private ByteArrayOutputStream mockErrOutput;
-    private static final String endl = System.getProperty("line.separator");
 
     @Before
     public void setUp() throws Exception {
