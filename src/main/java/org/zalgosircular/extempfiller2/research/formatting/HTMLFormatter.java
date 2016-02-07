@@ -108,7 +108,6 @@ public class HTMLFormatter implements ArticleFormatter {
         return body.html();
     }
 
-    @Override
     public String format(Article article) {
         final Document doc = Jsoup.parse("");
         doc.title(article.getTitle());

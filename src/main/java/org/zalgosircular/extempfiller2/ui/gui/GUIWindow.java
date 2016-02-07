@@ -3,8 +3,8 @@ package org.zalgosircular.extempfiller2.ui.gui;
 import org.zalgosircular.extempfiller2.authentication.AuthManager;
 import org.zalgosircular.extempfiller2.authentication.AuthRequest;
 import org.zalgosircular.extempfiller2.authentication.AuthResponse;
-import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
+import org.zalgosircular.extempfiller2.messaging.InMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
 import org.zalgosircular.extempfiller2.ui.gui.panels.MainPanel;
 import org.zalgosircular.extempfiller2.ui.gui.panels.TopicState;
@@ -59,7 +59,6 @@ class GUIWindow extends JFrame {
         menuBar = new JMenuBar();
         final JMenu fileMenu = new JMenu("File");
         fileMenu.add(createMenuItem("Load Topics From File", new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     loadTopicsFromFile();
@@ -69,7 +68,6 @@ class GUIWindow extends JFrame {
             }
         }));
         fileMenu.add(createMenuItem("Cancel Queued Topics", new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     managerPanel.cancelQueuedTopics();
@@ -79,7 +77,6 @@ class GUIWindow extends JFrame {
             }
         }));
         fileMenu.add(createMenuItem("Reload Topics", new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 inQueue.add(new InMessage(InMessage.Type.LOAD, null));
                 setEnabled(false);
@@ -87,7 +84,6 @@ class GUIWindow extends JFrame {
         }));
         fileMenu.addSeparator();
         fileMenu.add(createMenuItem("Close", new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     close();
@@ -99,7 +95,6 @@ class GUIWindow extends JFrame {
 
         final JMenu helpMenu = new JMenu("Help");
         helpMenu.add(createMenuItem("Show Debug Window", new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 debugWindow.setVisible(true);
             }

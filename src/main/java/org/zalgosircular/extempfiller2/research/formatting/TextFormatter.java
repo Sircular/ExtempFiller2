@@ -6,7 +6,6 @@ import org.zalgosircular.extempfiller2.research.Article;
  * Created by Logan Lembke on 7/8/2015.
  */
 public class TextFormatter implements ArticleFormatter {
-    @Override
     public String format(Article article) {
         final StringBuilder sb = new StringBuilder();
         final String endl = System.getProperty("line.separator");
@@ -26,7 +25,6 @@ public class TextFormatter implements ArticleFormatter {
         return sb.toString();
     }
 
-    @Override
     public String getDefaultFileExtension() {
         return ".txt";
     }

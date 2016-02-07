@@ -6,6 +6,7 @@ import org.zalgosircular.extempfiller2.research.Topic;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -165,7 +166,6 @@ public class TopicListPanel extends JPanel {
     }
 
     private class DeleteKeyBind extends AbstractAction {
-        @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 deleteSelected();
@@ -192,7 +192,6 @@ public class TopicListPanel extends JPanel {
         private boolean selected;
         private TopicState topicState;
         private MouseListener clickListener = new MouseListener() {
-            @Override
             public void mouseClicked(MouseEvent e) {
                 if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) != 0) {
                     int selectionEnd = -1;
@@ -218,22 +217,18 @@ public class TopicListPanel extends JPanel {
                 ((Container) e.getSource()).requestFocus();
             }
 
-            @Override
             public void mousePressed(MouseEvent e) {
 
             }
 
-            @Override
             public void mouseReleased(MouseEvent e) {
 
             }
 
-            @Override
             public void mouseEntered(MouseEvent e) {
 
             }
 
-            @Override
             public void mouseExited(MouseEvent e) {
 
             }
@@ -337,7 +332,6 @@ public class TopicListPanel extends JPanel {
         private JButton createDeleteButton() {
             final JButton button = new JButton("Delete");
             button.addActionListener(new ActionListener() {
-                @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
                         deleteTopic(((TopicListItem) ((JButton) e.getSource()).getParent()));

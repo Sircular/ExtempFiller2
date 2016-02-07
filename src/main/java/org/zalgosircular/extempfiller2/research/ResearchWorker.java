@@ -19,16 +19,13 @@ import java.util.concurrent.BlockingQueue;
  */
 public class ResearchWorker implements Runnable {
 
-    private final static int MAX_ARTICLES = 10; // we'll add a way to change this later
-
-    private Thread researchThread = null;
     public final static String THREAD_NAME = "Research Worker";
-
+    private final static int MAX_ARTICLES = 10; // we'll add a way to change this later
     private final BlockingQueue<InMessage> inQueue;
     private final BlockingQueue<OutMessage> outQueue;
-
     private final ArticleFetcher fetcher;
     private final StorageFacility storage;
+    private Thread researchThread = null;
 
     public ResearchWorker(BlockingQueue<InMessage> inQueue, BlockingQueue<OutMessage> outQueue,
                           ArticleFetcher fetcher, StorageFacility storage) {

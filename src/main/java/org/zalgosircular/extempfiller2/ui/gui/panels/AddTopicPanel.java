@@ -27,12 +27,10 @@ public class AddTopicPanel extends JPanel {
 
         addField = new JTextField();
         addField.addKeyListener(new KeyListener() {
-            @Override
             public void keyTyped(KeyEvent e) {
                 addButton.setEnabled(addField.getText().length() > 0);
             }
 
-            @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     try {
@@ -43,7 +41,6 @@ public class AddTopicPanel extends JPanel {
                 }
             }
 
-            @Override
             public void keyReleased(KeyEvent e) {
 
             }
@@ -51,7 +48,6 @@ public class AddTopicPanel extends JPanel {
 
         addButton = new JButton("Add Topic");
         addButton.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     enqueueTypedTopic();

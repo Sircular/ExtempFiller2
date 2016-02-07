@@ -33,13 +33,11 @@ public class DebugWindow extends JFrame {
 
         // add listeners
         closeItem.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 hideWindow();
             }
         });
         saveAsItem.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 outputPath = selectFileOutputPath();
                 if (!outputPath.equals(""))
@@ -47,7 +45,6 @@ public class DebugWindow extends JFrame {
             }
         });
         saveItem.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 if (outputPath.equals(""))
                     outputPath = selectFileOutputPath();

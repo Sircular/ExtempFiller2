@@ -22,7 +22,6 @@ class OutputRunnable implements Runnable {
         this.outQueue = outQueue;
     }
 
-    @Override
     public void run() {
         addDebugMessage("Initializing ExtempFiller2...");
         setWindowEnabled(false); // wait until topics are loaded
@@ -94,7 +93,6 @@ class OutputRunnable implements Runnable {
 
     private void addDebugMessage(final String msg) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
                 window.addDebugMessage(msg);
             }
@@ -103,7 +101,6 @@ class OutputRunnable implements Runnable {
 
     private void showError(final ErrorMessage msg) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
                 window.showError(msg);
             }
@@ -112,7 +109,6 @@ class OutputRunnable implements Runnable {
 
     private void removeTopic(final Topic topic) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
                 window.removeTopic(topic);
             }
@@ -121,7 +117,6 @@ class OutputRunnable implements Runnable {
 
     private void setTopicState(final Topic topic, final TopicState state) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
                 window.setTopicState(topic, state);
             }
@@ -130,7 +125,6 @@ class OutputRunnable implements Runnable {
 
     private void setWindowEnabled(final boolean value) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
                 window.setEnabled(value);
             }
@@ -143,7 +137,6 @@ class OutputRunnable implements Runnable {
 
     private void requestAuth(final AuthRequest request) {
         SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
                 window.requestAuth(request);
             }

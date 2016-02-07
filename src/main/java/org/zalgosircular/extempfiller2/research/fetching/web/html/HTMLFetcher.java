@@ -16,8 +16,8 @@ import java.util.concurrent.BlockingQueue;
  * Created by Walt on 7/9/2015.
  */
 public class HTMLFetcher {
-    protected final BlockingQueue<OutMessage> outQueue;
     private static final int TIMEOUT = 10 * 1000;
+    protected final BlockingQueue<OutMessage> outQueue;
 
     public HTMLFetcher(BlockingQueue<OutMessage> outQueue) {
         this.outQueue = outQueue;
