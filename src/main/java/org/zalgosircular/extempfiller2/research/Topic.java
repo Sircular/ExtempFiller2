@@ -12,6 +12,11 @@ public class Topic {
         this.articleCount = 0;
     }
 
+    public Topic(String topic, int articleCount) {
+        this.topic = topic;
+        this.articleCount = articleCount;
+    }
+
     public String getTopic() {
         return topic;
     }
