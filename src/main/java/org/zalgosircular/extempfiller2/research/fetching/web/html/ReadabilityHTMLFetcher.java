@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research.fetching.web.html;
 
+import org.jsoup.HttpStatusException;
 import org.zalgosircular.extempfiller2.authentication.AuthManager;
 import org.zalgosircular.extempfiller2.authentication.AuthRequest;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
@@ -27,8 +28,9 @@ public class ReadabilityHTMLFetcher extends HTMLFetcher {
         key = AuthManager.requestAuth(outQueue, new AuthRequest(new String[]{"readability"})).getResponses()[0];
     }
 
-    public String getResponse(URI location, Topic topic) throws InterruptedException {
-        if (key == null) {
+    public String getResponse(URI location, Topic topic) throws InterruptedException, HttpStatusException {
+        while (key == null) {
+            outQueue.put(new OutMessage(OutMessage.Type.DEBUG, "Attempting readability authorization..."));
             auth();
         }
         try {
