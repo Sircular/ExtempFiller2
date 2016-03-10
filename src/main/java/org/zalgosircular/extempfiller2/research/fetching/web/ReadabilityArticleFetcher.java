@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research.fetching.web;
 
+import org.jsoup.HttpStatusException;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Article;
@@ -11,6 +12,7 @@ import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SearchEngineFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.URLFetcher;
 
+import javax.print.attribute.standard.Severity;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +44,35 @@ public class ReadabilityArticleFetcher extends ArticleFetcher {
         int articlesFound = 0;
         while (articlesFound < maxResults && urlFetcher.hasNext()) {
             final URI url = urlFetcher.getNext();
-            final String response = readabilityFetcher.getResponse(url, topic);
-            if (response != null) {
-                final Article article = readabilityArticleParser.parse(response);
-                if (article != null) {
-                    articles.add(article);
-                    articlesFound++;
+            boolean complete = false;
+            while (!complete) {
+                try {
+                    final String response = readabilityFetcher.getResponse(url, topic);
+                    if (response != null) {
+                        final Article article = readabilityArticleParser.parse(response);
+                        if (article != null) {
+                            articles.add(article);
+                            articlesFound++;
+                            complete = true;
+                        }
+                    }
+                } catch (HttpStatusException e) {
+                    final int code = e.getStatusCode();
+                    switch (code) {
+                        case 504:
+                        case 400:
+                            outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Readability unable to parse request."));
+                            complete = true;
+                            break;
+                        case 429:
+                            outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Too many requests. Waiting 60 seconds to continue."));
+                            Thread.sleep(60*1000);
+                            break;
+                        default:
+                            outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Unknown readability error: " + code));
+                            complete = true;
+                            break;
+                    }
                 }
             }
         }
