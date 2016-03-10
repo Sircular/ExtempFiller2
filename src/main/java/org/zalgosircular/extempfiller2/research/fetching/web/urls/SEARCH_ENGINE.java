@@ -9,7 +9,7 @@ public enum SEARCH_ENGINE {
             "div#foot span#xjs div#navcnt table#nav tbody tr td.b a.pn span"
     ),
     DDG("http://duckduckgo.com/html/?q=%s&s=%s",
-            "div#links div.links_main.links_deep a",
+            "div#links div.links_main.links_deep a.result__a",
             "div#links div.results_links_more form input.navbutton"
     );
 
