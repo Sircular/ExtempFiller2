@@ -8,6 +8,7 @@ import org.jsoup.parser.Tag;
 import org.jsoup.select.Elements;
 import org.zalgosircular.extempfiller2.research.Article;
 
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -69,8 +70,11 @@ public class HTMLFormatter implements ArticleFormatter {
     // a few standard tags
     // to generate something like "printer-friendly"
     // pages
-    protected String normalizeContent(String content) {
-        final Document doc = Jsoup.parse(content);
+    protected String normalizeContent(String rawContent) {
+        // normalize from UTF-8 to ascii
+        final String asciiContent = Normalizer.normalize(rawContent, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCOMBINING_DIACRITICAL_MARKS}+", "");
+        final Document doc = Jsoup.parse(asciiContent);
         // Evernote is strict, and this is just the
         // HTML equivalent
         doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
