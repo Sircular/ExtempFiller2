@@ -1,5 +1,6 @@
 package org.zalgosircular.extempfiller2.research.fetching.web.html;
 
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
@@ -23,7 +24,7 @@ public class HTMLFetcher {
         this.outQueue = outQueue;
     }
 
-    public String getResponse(URI location, Topic topic) throws InterruptedException {
+    public String getResponse(URI location, Topic topic) throws InterruptedException, HttpStatusException {
         try {
             return Jsoup.connect(location.toString()).timeout(TIMEOUT).get().html();
         } catch (MalformedURLException e) {
@@ -32,10 +33,12 @@ public class HTMLFetcher {
         } catch (UnsupportedEncodingException e) {
             // this shouldn't happen either
             e.printStackTrace();
+        } catch (HttpStatusException e) { // extends IOException
+            throw e;
         } catch (IOException e) {
             // this will happen quite a bit
             ErrorMessage.SEVERITY severity;
-            if (e.getMessage().toLowerCase().contains("http error") || e instanceof SocketTimeoutException)
+            if (e instanceof SocketTimeoutException)
                 severity = ErrorMessage.SEVERITY.WARNING;
             else
                 severity = ErrorMessage.SEVERITY.CRITICAL;
