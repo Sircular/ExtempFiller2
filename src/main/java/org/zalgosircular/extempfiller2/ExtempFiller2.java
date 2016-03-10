@@ -7,6 +7,9 @@ import org.zalgosircular.extempfiller2.research.fetching.ArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.ReadabilityArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.formatting.ENMLFormatter;
+import org.zalgosircular.extempfiller2.research.formatting.HTMLFormatter;
+import org.zalgosircular.extempfiller2.research.storage.LocalHTMLStorage;
+import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
 import org.zalgosircular.extempfiller2.research.storage.evernote.EvernoteStorage;
 import org.zalgosircular.extempfiller2.ui.cli.CLI;
@@ -20,11 +23,12 @@ import java.util.concurrent.BlockingQueue;
  */
 public class ExtempFiller2 {
 
+    //TODO: allow switching between backends at runtime
     public static void main(String[] args) {
         final BlockingQueue<InMessage> inQueue = new ArrayBlockingQueue<InMessage>(1024);
         final BlockingQueue<OutMessage> outQueue = new ArrayBlockingQueue<OutMessage>(1024);
-        final ArticleFetcher fetcher = new ReadabilityArticleFetcher(outQueue, SEARCH_ENGINE.GOOGLE);
-        final StorageFacility storage = new EvernoteStorage(outQueue, new ENMLFormatter());
+        final ArticleFetcher fetcher = new ReadabilityArticleFetcher(outQueue, SEARCH_ENGINE.DDG);
+        final StorageFacility storage = new LocalHTMLStorage(outQueue, new HTMLFormatter());
         final ResearchWorker worker = new ResearchWorker(inQueue, outQueue, fetcher, storage);
         worker.getThread().start();
 
