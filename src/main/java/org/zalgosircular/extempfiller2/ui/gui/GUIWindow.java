@@ -215,7 +215,7 @@ class GUIWindow extends JFrame {
             File file = chooser.getSelectedFile();
             Scanner readScanner = new Scanner(file);
             while (readScanner.hasNext()) {
-                String topic = readScanner.nextLine();
+                String topic = readScanner.nextLine().trim();
                 if (!researched.contains(topic)) {
                     Topic t = new Topic(topic);
                     managerPanel.addTopic(t);
