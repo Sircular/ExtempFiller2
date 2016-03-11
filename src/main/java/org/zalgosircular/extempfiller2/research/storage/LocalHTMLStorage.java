@@ -14,6 +14,7 @@ import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -74,11 +75,11 @@ public class LocalHTMLStorage extends StorageFacility {
                 topics.put(t.getTopic(), t);
                 // populate article counts
                 DirectoryStream<Path> dirStream = Files.newDirectoryStream(getSafeFolderPath(t));
-                int count = 0;
+                int count = -1; // discount index
                 for (Path p : dirStream)
                     count++;
-                count--; // discount index;
                 t.setArticleCount(count);
+                dirStream.close();
             }
             return loadedTopics;
         } catch (IOException e) {
@@ -139,12 +140,16 @@ public class LocalHTMLStorage extends StorageFacility {
     public boolean delete(Topic topic) throws InterruptedException {
         Path dir = getSafeFolderPath(topic);
         try {
-            DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir);
-            for (Path p : dirStream) {
-                Files.delete(p);
-            }
-            dirStream.close();
-            Files.delete(dir);
+            Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+                public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
             topics.remove(topic.getTopic());
             rebuildGlobalIndex();
             return true;
