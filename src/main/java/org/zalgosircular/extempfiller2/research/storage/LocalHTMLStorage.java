@@ -47,7 +47,7 @@ public class LocalHTMLStorage extends StorageFacility {
         final Path indPath = getGlobalIndexPath();
         final List<Topic> indexTopics = new LinkedList<Topic>();
         if (Files.exists(indPath)) {
-            Document doc = Jsoup.parse(indPath.toFile(), "ISO-8859-1");
+            Document doc = Jsoup.parse(indPath.toFile(), "UTF-8");
             final Elements articleLinks = doc.select("ul#topics li a");
             for (Element e : articleLinks) {
                 indexTopics.add(new Topic(e.text()));
@@ -58,7 +58,9 @@ public class LocalHTMLStorage extends StorageFacility {
 
     @Override
     public boolean close() throws InterruptedException {
-        return false;
+        // just for safety
+        rebuildGlobalIndex();
+        return true;
     }
 
     @Override
@@ -176,7 +178,7 @@ public class LocalHTMLStorage extends StorageFacility {
         try {
             Document index = null;
             if (Files.exists(indexPath)) {
-                index = Jsoup.parse(indexPath.toFile(), "ISO-8859-1");
+                index = Jsoup.parse(indexPath.toFile(), "UTF-8");
             } else {
                 index = Jsoup.parse("<html><head><title>"+topic.getTopic()+"</title></head>"+
                                     "<body><h1>"+topic.getTopic()+"</h1><ul id='articles'></ul>"+

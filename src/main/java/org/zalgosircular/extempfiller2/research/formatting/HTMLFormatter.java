@@ -78,7 +78,6 @@ public class HTMLFormatter implements ArticleFormatter {
         // Evernote is strict, and this is just the
         // HTML equivalent
         doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
-        doc.head().appendChild(new Element(Tag.valueOf("meta"), "").attr("charset", "UTF-8"));
 
         final Element body = doc.body();
         // loop through all elements
@@ -116,6 +115,7 @@ public class HTMLFormatter implements ArticleFormatter {
     public String format(Article article) {
         final Document doc = Jsoup.parse("");
         doc.title(article.getTitle());
+        doc.head().appendElement("meta").attr("charset", "UTF-8");
         final Element body = doc.body();
 
         final Element infoDiv = generateInfoDiv(article);
