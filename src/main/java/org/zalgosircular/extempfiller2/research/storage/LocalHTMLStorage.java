@@ -70,17 +70,28 @@ public class LocalHTMLStorage extends StorageFacility {
     public List<Topic> loadResearched() throws InterruptedException {
         try {
             List<Topic> loadedTopics = loadTopicsFromIndex();
+            boolean indexInvalid = false; // in case some folders were deleted
             // populate the hash map for fast searching
-            for (Topic t : loadedTopics) {
-                topics.put(t.getTopic(), t);
+            final Iterator<Topic> topicIt = loadedTopics.iterator();
+            while (topicIt.hasNext()) {
+                final Topic t = topicIt.next();
                 // populate article counts
-                DirectoryStream<Path> dirStream = Files.newDirectoryStream(getSafeFolderPath(t));
-                int count = -1; // discount index
-                for (Path p : dirStream)
-                    count++;
-                t.setArticleCount(count);
-                dirStream.close();
+                final Path topicDir = getSafeFolderPath(t);
+                if (Files.exists(topicDir)) {
+                    DirectoryStream<Path> dirStream = Files.newDirectoryStream(topicDir);
+                    int count = -1; // discount index
+                    for (Path p : dirStream)
+                        count++;
+                    t.setArticleCount(count);
+                    dirStream.close();
+                    topics.put(t.getTopic(), t);
+                } else {
+                    topicIt.remove();
+                    indexInvalid = true;
+                }
             }
+            if (indexInvalid)
+                rebuildGlobalIndex();
             return loadedTopics;
         } catch (IOException e) {
             outQueue.add(new OutMessage(OutMessage.Type.ERROR, new ErrorMessage(null, ErrorMessage.SEVERITY.CRITICAL, e)));
