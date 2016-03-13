@@ -1,6 +1,5 @@
 package org.zalgosircular.extempfiller2.research.storage;
 
-import com.sun.xml.internal.bind.api.impl.NameConverter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,24 +12,20 @@ import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
-import java.util.regex.Pattern;
 
 /**
  * Created by Walt on 2/25/2016.
  */
-public class LocalHTMLStorage extends StorageFacility {
+public class HTMLIndexStorage extends StorageFacility {
     private final static Path HOME = Paths.get("./extemp");
     private final static String ILLEGAL_REGEX = "[\\\\/?<>\"'|:*\\[\\]\r\n]";
-    private final Map<String, Topic> topics = new HashMap<String, Topic>();
+    private final SortedMap<String, Topic> topics = new TreeMap<String, Topic>();
 
-    public LocalHTMLStorage(BlockingQueue<OutMessage> outQueue, ArticleFormatter formatter) {
+    public HTMLIndexStorage(BlockingQueue<OutMessage> outQueue, ArticleFormatter formatter) {
         super(outQueue, formatter);
     }
 

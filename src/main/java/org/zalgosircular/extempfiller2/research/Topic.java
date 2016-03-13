@@ -3,7 +3,7 @@ package org.zalgosircular.extempfiller2.research;
 /**
  * Created by Walt on 7/8/2015.
  */
-public class Topic {
+public class Topic implements Comparable<Topic> {
     private final String topic;
     private int articleCount;
 
@@ -32,5 +32,9 @@ public class Topic {
     @Override
     public boolean equals(Object o) {
         return (o instanceof Topic && ((Topic) o).getTopic().equals(this.topic));
+    }
+
+    public int compareTo(Topic t) {
+        return topic.compareTo(t.getTopic());
     }
 }
