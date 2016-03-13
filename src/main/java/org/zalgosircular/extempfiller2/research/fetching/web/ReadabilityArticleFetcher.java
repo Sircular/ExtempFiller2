@@ -13,6 +13,7 @@ import org.zalgosircular.extempfiller2.research.fetching.web.urls.SearchEngineFe
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.URLFetcher;
 
 import javax.print.attribute.standard.Severity;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,8 @@ public class ReadabilityArticleFetcher extends ArticleFetcher {
         while (articlesFound < maxResults && urlFetcher.hasNext()) {
             final URI url = urlFetcher.getNext();
             boolean complete = false;
-            while (!complete) {
+            int attempts = 5;
+            while (!complete && attempts > 0) {
                 try {
                     final String response = readabilityFetcher.getResponse(url, topic);
                     if (response != null) {
@@ -72,6 +74,12 @@ public class ReadabilityArticleFetcher extends ArticleFetcher {
                             outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Unknown readability error: " + code));
                             complete = true;
                             break;
+                    }
+                } catch (SocketTimeoutException e) {
+                    if (attempts > 0)
+                        attempts--;
+                    else {
+                        outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Unable to reach website: " + url.toString()));
                     }
                 }
             }

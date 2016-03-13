@@ -7,6 +7,7 @@ import org.zalgosircular.extempfiller2.messaging.ErrorMessage;
 import org.zalgosircular.extempfiller2.messaging.OutMessage;
 import org.zalgosircular.extempfiller2.research.Topic;
 
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.BlockingQueue;
@@ -28,7 +29,7 @@ public class ReadabilityHTMLFetcher extends HTMLFetcher {
         key = AuthManager.requestAuth(outQueue, new AuthRequest(new String[]{"readability"})).getResponses()[0];
     }
 
-    public String getResponse(URI location, Topic topic) throws InterruptedException, HttpStatusException {
+    public String getResponse(URI location, Topic topic) throws InterruptedException, HttpStatusException, SocketTimeoutException {
         while (key == null) {
             outQueue.put(new OutMessage(OutMessage.Type.DEBUG, "Attempting readability authorization..."));
             auth();

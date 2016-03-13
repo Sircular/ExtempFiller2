@@ -11,6 +11,7 @@ import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SearchEngineFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.URLFetcher;
 
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,8 @@ public class NoCruftArticleFetcher extends ArticleFetcher {
                 }
             } catch (HttpStatusException e) {
                 outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "HTTP error "+e.getStatusCode()));
+            } catch (SocketTimeoutException e) {
+                outQueue.add(new OutMessage(OutMessage.Type.DEBUG, "Unable to reach website: "+url.toString()));
             }
         }
         return articles;
