@@ -6,12 +6,9 @@ import org.zalgosircular.extempfiller2.research.ResearchWorker;
 import org.zalgosircular.extempfiller2.research.fetching.ArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.ReadabilityArticleFetcher;
 import org.zalgosircular.extempfiller2.research.fetching.web.urls.SEARCH_ENGINE;
-import org.zalgosircular.extempfiller2.research.formatting.ENMLFormatter;
 import org.zalgosircular.extempfiller2.research.formatting.HTMLFormatter;
 import org.zalgosircular.extempfiller2.research.storage.LocalHTMLStorage;
-import org.zalgosircular.extempfiller2.research.storage.LocalTextStorage;
 import org.zalgosircular.extempfiller2.research.storage.StorageFacility;
-import org.zalgosircular.extempfiller2.research.storage.evernote.EvernoteStorage;
 import org.zalgosircular.extempfiller2.ui.cli.CLI;
 import org.zalgosircular.extempfiller2.ui.gui.GUI;
 
