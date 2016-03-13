@@ -13,18 +13,22 @@ import org.zalgosircular.extempfiller2.research.formatting.ArticleFormatter;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Pattern;
 
 /**
  * Created by Walt on 2/25/2016.
  */
 public class LocalHTMLStorage extends StorageFacility {
     private final static Path HOME = Paths.get("./extemp");
-    private final static Map<String, Topic> topics = new HashMap<String, Topic>();
+    private final static String ILLEGAL_REGEX = "[\\\\/?<>\"'|:*\\[\\]\r\n]";
+    private final Map<String, Topic> topics = new HashMap<String, Topic>();
 
     public LocalHTMLStorage(BlockingQueue<OutMessage> outQueue, ArticleFormatter formatter) {
         super(outQueue, formatter);
@@ -219,7 +223,7 @@ public class LocalHTMLStorage extends StorageFacility {
     }
 
     private Path getSafeFolderPath(Topic t) {
-        return HOME.resolve(t.getTopic().replaceAll("[\\\\/?<>\"'|:*]", "").trim()
+        return HOME.resolve(t.getTopic().replaceAll(ILLEGAL_REGEX, "").trim()
                 .replace(" ", "_"));
     }
 
@@ -228,8 +232,8 @@ public class LocalHTMLStorage extends StorageFacility {
     }
 
     private Path getSafeArticlePath(Topic t, Article a) {
-        return getSafeFolderPath(t).resolve(a.getTitle().replaceAll("[\\\\/?<>\"'|:*]", "").trim()
-                .replace(" ", "_")+formatter.getDefaultFileExtension());
+        return getSafeFolderPath(t).resolve(a.getTitle().replaceAll(ILLEGAL_REGEX, "").trim()
+                .replace(" ", "_") + formatter.getDefaultFileExtension());
     }
 
     private Path getGlobalIndexPath() {
